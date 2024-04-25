@@ -21,17 +21,29 @@
  */
 package dk.dtu.compute.se.pisd.roborally.view;
 
+import com.google.gson.*;
+import com.sun.tools.javac.Main;
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
+import dk.dtu.compute.se.pisd.roborally.controller.ConveyorBelt;
 import dk.dtu.compute.se.pisd.roborally.model.Heading;
 import dk.dtu.compute.se.pisd.roborally.model.Player;
 import dk.dtu.compute.se.pisd.roborally.model.Space;
+
+import com.google.gson.stream.JsonReader;
+
+import java.io.*;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeLineCap;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 /**
  * ...
@@ -59,11 +71,114 @@ public class SpaceView extends StackPane implements ViewObserver {
         this.setMinHeight(SPACE_HEIGHT);
         this.setMaxHeight(SPACE_HEIGHT);
 
+        /*
+        StartBoard.exexuteStartBoard(this, space);
+        if (Objects.equals(Value.map, "GoldenStripe"))
+            GoldStripe.executeGoldStripe(this, space);
+        else if (Objects.equals(Value.map, "WhirlWind"))
+            WhirlWind.executeWhirlWind(this, space);
+        else if (Objects.equals(Value.map, "RingOfDeath"))
+            RingOfDeath.executeRingOfDeath(this, space);
+//        else if (Objects.equals(Value.map, "Testing"))
+//            TestingMap.executeTestMap(this, space);
+        else GoldStripe.executeGoldStripe(this,space);
+*/
+
+        if ((space.x + space.y) % 2 == 0) {
+            paint(4,0);
+        } else {
+            paint(4,0);
+        }
+
+        // Path to the JSON file
+        String filePath = "src/main/resources/boards/defaultboard.json";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            // Read the JSON file as a string
+            StringBuilder jsonStringBuilder = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                jsonStringBuilder.append(line);
+            }
+            String jsonString = jsonStringBuilder.toString();
+
+            // Parse the JSON string
+            Gson gson = new Gson();
+            JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+
+            // Get the "spaces" array
+            JsonArray spacesArray = jsonObject.getAsJsonArray("spaces");
+            if (spacesArray != null) {
+                // Iterate over each element in the array
+                for (JsonElement spaceElement : spacesArray) {
+                    // Get the "actions" array for each space
+                    JsonObject spaceObject = spaceElement.getAsJsonObject();
+                    JsonArray actionsArray = spaceObject.getAsJsonArray("actions");
+                    if (actionsArray != null) {
+                        // Iterate over each element in the "actions" array
+                        for (JsonElement actionElement : actionsArray) {
+                            JsonObject actionObject = actionElement.getAsJsonObject();
+                            String className = actionObject.getAsJsonPrimitive("CLASSNAME").getAsString();
+                            className = className.substring(className.lastIndexOf('.') + 1);
+                            JsonObject instanceObject = actionObject.getAsJsonObject("INSTANCE");
+                            JsonArray wallsArray = spaceObject.getAsJsonArray("walls");
+                            int x = spaceObject.getAsJsonPrimitive("x").getAsInt();
+                            int y = spaceObject.getAsJsonPrimitive("y").getAsInt();
+
+                            if (wallsArray !=null)
+                                for (JsonElement wall : wallsArray) {
+                                    if (Objects.equals(wall.getAsString(), "NORTH")){
+                                        if (space.x == x && space.y+1 == y)
+                                            paint(4,3);
+                                    }
+                                    else if (Objects.equals(wall.getAsString(), "SOUTH")){
+                                        if (space.x == x && space.y == y+1)
+                                            paint(6,3);
+                                    }
+                                    else if (Objects.equals(wall.getAsString(), "EAST")){
+                                        if (space.x == x+1 && space.y == y)
+                                            paint(5,3);
+                                    }
+                                    else if (Objects.equals(wall.getAsString(), "WEST")){
+                                        if (space.x+1 == x && space.y == y  )
+                                            paint(6,2);
+                                    }
+                                    System.out.println("set wall on " + wall.getAsString() + " facing me");
+                                }
+                            System.out.println("set on "+x+","+y+" : "+ className+" "+instanceObject.getAsJsonPrimitive("heading").getAsString());
+
+                            // down right left up
+                            if (instanceObject!=null && space.x == x && space.y == y){
+                                if (Objects.equals(instanceObject.getAsJsonPrimitive("heading").getAsString(), "SOUTH"))
+                                    paint(1,6);
+                                else if (Objects.equals(instanceObject.getAsJsonPrimitive("heading").getAsString(), "EAST"))
+                                    paint(3,6);
+                                else if (Objects.equals(instanceObject.getAsJsonPrimitive("heading").getAsString(), "WEST"))
+                                    paint(2,6);
+                                else if (Objects.equals(instanceObject.getAsJsonPrimitive("heading").getAsString(), "NORTH"))
+                                    paint(0,6);
+                            }
+
+
+                            // Print a separator for clarity
+                            System.out.println("-----------------------------------");
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
+
+        /*
         if ((space.x + space.y) % 2 == 0) {
             this.setStyle("-fx-background-color: white;");
         } else {
             this.setStyle("-fx-background-color: black;");
-        }
+        }*/
 
         // updatePlayer();
 
@@ -98,4 +213,20 @@ public class SpaceView extends StackPane implements ViewObserver {
         }
     }
 
+    private void paint(double x,double y){
+        this.setStyle("-fx-background-image: url(board_tiles.jpg)" +
+                "; -fx-background-position: " + 16.5*x + "% " + 8.25*y + "%" + //16.6, 8.25
+                "; -fx-background-size: " + 430 + "px " + 793 + "px"
+        );
+    }
+
+    private void paintOn(double x,double y){
+        ImageView overlayImageView = new ImageView(new Image("board_tiles.jpg"));
+        overlayImageView.setFitWidth(430); // Set the width of the overlay image
+        overlayImageView.setFitHeight(793); // Set the height of the overlay image
+        overlayImageView.setX(x * getWidth() / 100); // Convert percentage to pixels
+        overlayImageView.setY(y * getHeight() / 100); // Convert percentage to pixels
+
+        this.getChildren().add(overlayImageView);
+    }
 }
