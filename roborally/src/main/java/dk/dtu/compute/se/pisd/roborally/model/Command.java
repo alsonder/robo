@@ -40,6 +40,10 @@ public enum Command {
     LEFT("Turn Left"),
     FAST_FORWARD("Fast Fwd"),
 
+    SUPER_FORWARD("Super Fwd"),
+
+    BACK("Move Back"),
+
     OPTION_LEFT_RIGHT("Left OR Right", LEFT, RIGHT);
 
     final public String displayName;

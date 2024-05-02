@@ -60,17 +60,70 @@ public class GameController {
 
     // TODO Assignment A3
     public void fastForward(@NotNull Player player) {
+        for (int i = 0; i < 2; i++) {
+            moveForward(player);
+        }
+    }
 
+    public void superForward(@NotNull Player player){
+        for (int i = 0; i < 3; i++) {
+            moveForward(player);
+        }
     }
 
     // TODO Assignment A3
     public void turnRight(@NotNull Player player) {
-
+        if(player.getHeading()==Heading.EAST){
+            player.setHeading(Heading.SOUTH);
+        }
+        else if(player.getHeading()==Heading.SOUTH){
+            player.setHeading(Heading.WEST);
+        }
+        else if(player.getHeading()==Heading.WEST){
+            player.setHeading(Heading.NORTH);
+        }
+        else if(player.getHeading()==Heading.NORTH){
+            player.setHeading(Heading.EAST);
+        }
     }
 
     // TODO Assignment A3
     public void turnLeft(@NotNull Player player) {
+        if(player.getHeading()==Heading.EAST){
+            player.setHeading(Heading.NORTH);
+        }
+        else if(player.getHeading()==Heading.NORTH){
+            player.setHeading(Heading.WEST);
+        }
+        else if(player.getHeading()==Heading.WEST){
+            player.setHeading(Heading.SOUTH);
+        }
+        else if(player.getHeading()==Heading.SOUTH){
+            player.setHeading(Heading.EAST);
+        }
+    }
 
+    public void moveBack(@NotNull Player player) {
+        if (player.board == board) {
+            Space space = player.getSpace();
+            Heading curheading = player.getHeading();
+            for (int i = 0; i < 2; i++) {
+                turnLeft(player);
+            }
+            Heading heading = player.getHeading();
+            Space target = board.getNeighbour(space, heading);
+            if (target != null) {
+                try {
+                    moveToSpace(player, target, heading);
+                    player.setHeading(curheading);
+                } catch (ImpossibleMoveException e) {
+                    // we don't do anything here  for now; we just catch the
+                    // exception so that we do no pass it on to the caller
+                    // (which would be very bad style).
+                }
+
+            }
+        }
     }
 
     public boolean wallCollition(@NotNull Player player, int newx, int newy) {
@@ -207,6 +260,12 @@ public class GameController {
                     break;
                 case FAST_FORWARD:
                     this.fastForward(player);
+                    break;
+                case BACK:
+                    this.moveBack(player);
+                    break;
+                case SUPER_FORWARD:
+                    this.superForward(player);
                     break;
                 default:
                     // DO NOTHING (for now)
