@@ -73,6 +73,19 @@ public class GameController {
 
     }
 
+    public boolean wallCollition(@NotNull Player player, int newx, int newy) {
+        if (player.getSpace().x + 1 <= player.board.width) {
+            return (player.getSpace().x + 1 == newx && player.getSpace().y == newy); // if wall right return true
+        } else if (player.getSpace().x - 1 <= player.board.width) {
+            return (player.getSpace().x - 1 == newx && player.getSpace().y == newy); // if wall left
+        } else if (player.getSpace().y + 1 <= player.board.height) {
+            return (player.getSpace().x == newx && player.getSpace().y + 1 == newy); // if wall down
+        } else if (player.getSpace().y - 1 <= player.board.height) {
+            return (player.getSpace().x == newx && player.getSpace().y - 1 == newy); // if wall up
+        }
+        return false;
+    }
+
     void moveToSpace(@NotNull Player player, @NotNull Space space, @NotNull Heading heading) throws ImpossibleMoveException {
         assert board.getNeighbour(player.getSpace(), heading) == space; // make sure the move to here is possible in principle
         Player other = space.getPlayer();
