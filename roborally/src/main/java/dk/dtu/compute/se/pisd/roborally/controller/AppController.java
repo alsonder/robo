@@ -57,6 +57,7 @@ public class AppController implements Observer {
 
     private GameController gameController;
 
+    private String gameName = "unnamed";
     public AppController(@NotNull RoboRally roboRally) {
         this.roboRally = roboRally;
     }
@@ -78,13 +79,17 @@ public class AppController implements Observer {
 
             // XXX the board should eventually be created programmatically or loaded from a file
             //     here we just create an empty board with the required number of players.
-            Board board = new Board(8,8);
+            Board board = LoadBoard.loadBoard("defaultboard");
+
             gameController = new GameController(board);
             int no = result.get();
+            board.setSpawnSpacesDefault(no);
             for (int i = 0; i < no; i++) {
                 Player player = new Player(board, PLAYER_COLORS.get(i), "Player " + (i + 1));
                 board.addPlayer(player);
-                player.setSpace(board.getSpace(i % board.width, i));
+                player.setSpawnSpace(board.getSpawnSpaces().get(i));
+                player.setSpace(player.getSpawnSpace());
+
             }
 
             // XXX: V2
@@ -94,10 +99,10 @@ public class AppController implements Observer {
             roboRally.createBoardView(gameController);
         }
     }
-    private void showAlert(String message) {
+    private Optional<ButtonType> showAlert(String message) {
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setHeaderText(message);
-        alert.showAndWait();
+        return alert.showAndWait();
     }
     private String selectBoard(String[] boards) {
 
@@ -118,26 +123,37 @@ public class AppController implements Observer {
         return track;
     }
 
-    public void saveGame() {
+    private Optional<String> showSaveGameDialog() {
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Save game");
-        dialog.setHeaderText("save as");
+        dialog.setHeaderText("Save As");
+        return dialog.showAndWait();
+    }
+    public void saveGame() {
+        Optional<String> result = Optional.empty();
+        if(gameName.equals("unnamed"))
+            result = showSaveGameDialog();
 
-        String result = dialog.showAndWait().get();
-
-        if (result.equals("")) {
-            showAlert("Please enter a name for the saved game");
+        if(result.isEmpty())
             return;
+        while(result.get().equals("")) {
+            if(showAlert("Please enter a name for the saved game or cancel the save").get() != ButtonType.OK) return;
+            result = showSaveGameDialog();
+            //additional break condition if the user doesn't want to save.
+            if(result.isEmpty()) return;
+        }
+        gameName = result.get();
+
+        if (Arrays.asList(LoadBoard.getTracks()).contains(gameName)) {
+            showAlert("Saving and overriding " + gameName);
         }
 
-        if (Arrays.asList(LoadBoard.getTracks()).contains(result)) {
-            showAlert("Saving and overriding " + result);
-        }
-
-        LoadBoard.saveCurrentGame(this.gameController.board, result);
-        System.out.println("Saved as " + result);
+        LoadBoard.saveCurrentGame(this.gameController.board, gameName);
+        System.out.println("Saved as " + gameName);
 
     }
+
+
 
     public void loadGame() {
 
@@ -156,7 +172,7 @@ public class AppController implements Observer {
 
         gameController = new GameController(board);
         roboRally.createBoardView(gameController);
-
+        gameName = track;
     }
 
     /**

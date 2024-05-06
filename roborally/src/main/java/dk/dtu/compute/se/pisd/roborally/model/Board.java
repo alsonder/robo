@@ -233,8 +233,14 @@ public class Board extends Subject {
 
     public List<Space> getSpawnSpaces(){return spawnSpaces;}
     public void setSpawnSpacesDefault(int maxPlayer) {
+        int x = 0,y = 0;
         for (int i = 0; i < maxPlayer; i++) {
-            spawnSpaces.add(spaces[0][i]);
+            spawnSpaces.add(spaces[x][y]);
+            y++;
+            if(i >= height){
+                y = 0;
+                x++;
+            }
         }
     }
 }
