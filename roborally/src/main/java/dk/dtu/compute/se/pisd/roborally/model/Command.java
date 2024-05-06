@@ -21,6 +21,8 @@
  */
 package dk.dtu.compute.se.pisd.roborally.model;
 
+import com.google.gson.annotations.Expose;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +51,7 @@ public enum Command {
     POWER_UP("Power Up"),
     AGAIN("Again"),
     DAMAGE("Damage");
-
+    @Expose
     final public String displayName;
 
     final private List<Command> options;
