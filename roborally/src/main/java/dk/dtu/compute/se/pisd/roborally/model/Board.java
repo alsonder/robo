@@ -21,6 +21,7 @@
  */
 package dk.dtu.compute.se.pisd.roborally.model;
 
+import com.google.gson.annotations.Expose;
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,16 +45,20 @@ public class Board extends Subject {
     private Integer gameId;
 
     private final Space[][] spaces;
-
+    @Expose
     private final List<Player> players = new ArrayList<>();
-
+    @Expose
     private Player current;
-
+    @Expose
     private Phase phase = INITIALISATION;
-
+    @Expose
     private int step = 0;
-
+    @Expose
     private boolean stepMode;
+    @Expose
+    private List<Space> spawnSpaces = new ArrayList<>();
+    @Expose
+    private String map = "defaultboard";
 
     public Board(int width, int height) {
         this.width = width;
@@ -109,6 +114,8 @@ public class Board extends Subject {
             return null;
         }
     }
+
+    public List<Player> getPlayers(){return players;}
 
     public Player getCurrentPlayer() {
         return current;
@@ -235,6 +242,28 @@ public class Board extends Subject {
                 return "Interaction required: Make your choice!";
             default:
                 return "Waiting for next phase...";
+        }
+    }
+    public void setMap(String m) {
+        map = m;
+    }
+
+    public String getMap() {
+        return map;
+    }
+
+    public void addSpawnSpace(Space space) {spawnSpaces.add(space);}
+
+    public List<Space> getSpawnSpaces(){return spawnSpaces;}
+    public void setSpawnSpacesDefault(int maxPlayer) {
+        int x = 0,y = 0;
+        for (int i = 0; i < maxPlayer; i++) {
+            spawnSpaces.add(spaces[x][y]);
+            y++;
+            if(i >= height){
+                y = 0;
+                x++;
+            }
         }
     }
 }

@@ -21,6 +21,7 @@
  */
 package dk.dtu.compute.se.pisd.roborally.model;
 
+import com.google.gson.annotations.Expose;
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,17 +39,22 @@ public class Player extends Subject {
     final public static int NO_CARDS = 8;
 
     final public Board board;
-
+    @Expose
     private String name;
+    @Expose
     private String color;
-
+    @Expose
     private Space space;
+    @Expose
     private Heading heading = SOUTH;
-
+    @Expose
     private CommandCardField[] program;
+    @Expose
     private CommandCardField[] cards;
-
+    @Expose
     private int energyCubes;
+    @Expose
+    private Space spawnSpace;
 
     public Player(@NotNull Board board, String color, @NotNull String name) {
         this.board = board;
@@ -56,6 +62,7 @@ public class Player extends Subject {
         this.color = color;
 
         this.space = null;
+        this.spawnSpace = null;
 
         program = new CommandCardField[NO_REGISTERS];
         for (int i = 0; i < program.length; i++) {
@@ -111,6 +118,17 @@ public class Player extends Subject {
             }
             notifyChange();
         }
+    }
+
+    public void setSpawnSpace(Space spawnSpace) {
+        this.spawnSpace = spawnSpace;
+    }
+    /**
+     * Returns the player's current spawn location.
+     * @return a Space object representing the player's spawn location
+     */
+    public Space getSpawnSpace() {
+        return spawnSpace;
     }
 
     public Heading getHeading() {
@@ -170,6 +188,17 @@ public class Player extends Subject {
 
     public CommandCardField getCardField(int i) {
         return cards[i];
+    }
+
+    public void setProgramField(int i, CommandCardField field) {
+        program[i].setCard(field.getCard());
+        program[i].setVisible(field.isVisible());
+        notifyChange();
+    }
+
+    public void setCardField(int i, CommandCardField field) {
+        cards[i].setCard(field.getCard());
+        notifyChange();
     }
 
 }
