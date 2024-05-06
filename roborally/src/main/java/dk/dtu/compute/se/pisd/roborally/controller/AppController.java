@@ -26,6 +26,7 @@ import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
 
 import dk.dtu.compute.se.pisd.roborally.RoboRally;
 
+import dk.dtu.compute.se.pisd.roborally.fileaccess.LoadBoard;
 import dk.dtu.compute.se.pisd.roborally.model.Board;
 import dk.dtu.compute.se.pisd.roborally.model.Player;
 
@@ -34,6 +35,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.TextInputDialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -92,17 +94,69 @@ public class AppController implements Observer {
             roboRally.createBoardView(gameController);
         }
     }
+    private void showAlert(String message) {
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setHeaderText(message);
+        alert.showAndWait();
+    }
+    private String selectBoard(String[] boards) {
+
+        if (boards == null || boards.length == 0) {
+            showAlert("No tracks");
+            return null;
+        }
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(boards[0], boards);
+        dialog.setTitle("Track selection");
+        dialog.setHeaderText("Pick a track");
+        Optional<String> result = dialog.showAndWait();
+        String track = "";
+        if (result.isPresent()) {
+            track = result.get();
+            System.out.println("Track chosen: " + track);
+        }
+        return track;
+    }
 
     public void saveGame() {
-        // XXX needs to be implemented eventually
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Save game");
+        dialog.setHeaderText("save as");
+
+        String result = dialog.showAndWait().get();
+
+        if (result.equals("")) {
+            showAlert("Please enter a name for the saved game");
+            return;
+        }
+
+        if (Arrays.asList(LoadBoard.getTracks()).contains(result)) {
+            showAlert("Saving and overriding " + result);
+        }
+
+        LoadBoard.saveCurrentGame(this.gameController.board, result);
+        System.out.println("Saved as " + result);
+
     }
 
     public void loadGame() {
-        // XXX needs to be implemented eventually
-        // for now, we just create a new game
-        if (gameController == null) {
-            newGame();
+
+        String track = selectBoard(LoadBoard.getActiveGames());
+
+        if (track == null || track.isEmpty()) {
+            showAlert("Could not load game");
+            return;
         }
+
+        Board board = LoadBoard.loadActiveBoard(track);
+        if (board == null) {
+            showAlert("Could not load game");
+            return;
+        }
+
+        gameController = new GameController(board);
+        roboRally.createBoardView(gameController);
+
     }
 
     /**

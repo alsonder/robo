@@ -50,12 +50,15 @@ public class Player extends Subject {
 
     private int energyCubes;
 
+    private Space spawnSpace;
+
     public Player(@NotNull Board board, String color, @NotNull String name) {
         this.board = board;
         this.name = name;
         this.color = color;
 
         this.space = null;
+        this.spawnSpace = null;
 
         program = new CommandCardField[NO_REGISTERS];
         for (int i = 0; i < program.length; i++) {
@@ -111,6 +114,17 @@ public class Player extends Subject {
             }
             notifyChange();
         }
+    }
+
+    public void setSpawnSpace(Space spawnSpace) {
+        this.spawnSpace = spawnSpace;
+    }
+    /**
+     * Returns the player's current spawn location.
+     * @return a Space object representing the player's spawn location
+     */
+    public Space getSpawnSpace() {
+        return spawnSpace;
     }
 
     public Heading getHeading() {
@@ -170,6 +184,17 @@ public class Player extends Subject {
 
     public CommandCardField getCardField(int i) {
         return cards[i];
+    }
+
+    public void setProgramField(int i, CommandCardField field) {
+        program[i].setCard(field.getCard());
+        program[i].setVisible(field.isVisible());
+        notifyChange();
+    }
+
+    public void setCardField(int i, CommandCardField field) {
+        cards[i].setCard(field.getCard());
+        notifyChange();
     }
 
 }

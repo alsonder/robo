@@ -38,4 +38,6 @@ public class BoardTemplate {
 
     public List<SpaceTemplate> spaces = new ArrayList<>();
 
+    public List<SpaceTemplate> spawnSpaces = new ArrayList<>();
+
 }

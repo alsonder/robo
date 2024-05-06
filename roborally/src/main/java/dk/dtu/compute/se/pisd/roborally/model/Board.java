@@ -55,6 +55,10 @@ public class Board extends Subject {
 
     private boolean stepMode;
 
+    private List<Space> spawnSpaces = new ArrayList<>();
+
+    private String map = "defaultboard";
+
     public Board(int width, int height) {
         this.width = width;
         this.height = height;
@@ -109,6 +113,8 @@ public class Board extends Subject {
             return null;
         }
     }
+
+    public List<Player> getPlayers(){return players;}
 
     public Player getCurrentPlayer() {
         return current;
@@ -213,5 +219,21 @@ public class Board extends Subject {
     public String getStatusMessage() {
 
         return "";
+    }
+    public void setMap(String m) {
+        map = m;
+    }
+
+    public String getMap() {
+        return map;
+    }
+
+    public void addSpawnSpace(Space space) {spawnSpaces.add(space);}
+
+    public List<Space> getSpawnSpaces(){return spawnSpaces;}
+    public void setSpawnSpacesDefault(int maxPlayer) {
+        for (int i = 0; i < maxPlayer; i++) {
+            spawnSpaces.add(spaces[0][i]);
+        }
     }
 }
