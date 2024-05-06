@@ -62,12 +62,17 @@ public class PlayerView extends Tab implements ViewObserver {
 
     private GameController gameController;
 
+    private Label energyCubesLabel;
+
     public PlayerView(@NotNull GameController gameController, @NotNull Player player) {
         super(player.getName());
         this.setStyle("-fx-text-base-color: " + player.getColor() + ";");
 
         top = new VBox();
         this.setContent(top);
+
+        energyCubesLabel = new Label("Energy Cubes: " + player.getEnergyCubes());
+        energyCubesLabel.getStyleClass().add("energy-cubes-label");
 
         this.gameController = gameController;
         this.player = player;
@@ -125,6 +130,7 @@ public class PlayerView extends Tab implements ViewObserver {
         top.getChildren().add(programPane);
         top.getChildren().add(cardsLabel);
         top.getChildren().add(cardsPane);
+        top.getChildren().add(energyCubesLabel);
 
         if (player.board != null) {
             player.board.attach(this);
@@ -135,6 +141,7 @@ public class PlayerView extends Tab implements ViewObserver {
     @Override
     public void updateView(Subject subject) {
         if (subject == player.board) {
+            energyCubesLabel.setText("Energy Cubes: " + player.getEnergyCubes());
             for (int i = 0; i < Player.NO_REGISTERS; i++) {
                 CardFieldView cardFieldView = programCardViews[i];
                 if (cardFieldView != null) {

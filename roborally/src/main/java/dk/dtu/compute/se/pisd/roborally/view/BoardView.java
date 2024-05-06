@@ -53,6 +53,8 @@ public class BoardView extends VBox implements ViewObserver {
 
     private SpaceEventHandler spaceEventHandler;
 
+    private Phase phase = Phase.INITIALISATION;
+
     public BoardView(@NotNull GameController gameController) {
         board = gameController.board;
 

@@ -48,6 +48,8 @@ public class Player extends Subject {
     private CommandCardField[] program;
     private CommandCardField[] cards;
 
+    private int energyCubes;
+
     public Player(@NotNull Board board, String color, @NotNull String name) {
         this.board = board;
         this.name = name;
@@ -123,6 +125,23 @@ public class Player extends Subject {
                 space.playerChanged();
             }
         }
+    }
+
+    public int getEnergyCubes() {
+        return energyCubes;
+    }
+
+    public void addEnergyCubes(int amount) {
+        this.energyCubes += amount;
+        notifyChange();
+    }
+
+    public void useEnergyCubes(int amount) {
+        if (amount > this.energyCubes) {
+            throw new IllegalArgumentException("Not enough energy cubes");
+        }
+        this.energyCubes -= amount;
+        notifyChange();
     }
 
     public CommandCardField getProgramField(int i) {

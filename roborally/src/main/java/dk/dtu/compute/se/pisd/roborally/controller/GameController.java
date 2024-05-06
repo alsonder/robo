@@ -267,6 +267,8 @@ public class GameController {
                 case SUPER_FORWARD:
                     this.superForward(player);
                     break;
+                case POWER_UP:
+                    player.addEnergyCubes(1);
                 default:
                     // DO NOTHING (for now)
             }
