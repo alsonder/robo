@@ -210,8 +210,31 @@ public class Board extends Subject {
         return result;
     }
 
-    public String getStatusMessage() {
+    /**
+     * This method returns a status message based on the current phase of the game.
+     * The phases are as follows:
+     * - INITIALISATION: The game is in the setup phase, players are placing their robots on the board.
+     * - PROGRAMMING: Players are choosing their cards for the round.
+     * - ACTIVATION: The robots are moving based on the chosen cards.
+     * - PLAYER_INTERACTION: A player needs to make a choice, such as resolving a conflict.
+     * - default: The game is in an idle state, waiting for the next phase to start.
+     *
+     * @return A string containing the status message for the current phase.
+     * @author Aleksander Sonder, s185289
+     */
 
-        return "";
+    public String getStatusMessage() {
+        switch (getPhase()) {
+            case INITIALISATION:
+                return "Initialization phase: Place your robots on the board.";
+            case PROGRAMMING:
+                return "Programming phase: Choose your cards.";
+            case ACTIVATION:
+                return "Activation phase: Watch the robots move!";
+            case PLAYER_INTERACTION:
+                return "Interaction required: Make your choice!";
+            default:
+                return "Waiting for next phase...";
+        }
     }
 }
