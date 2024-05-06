@@ -326,13 +326,13 @@
     }
   ],
   "current": {
-    "name": "Player 2",
-    "color": "green",
+    "name": "Player 4",
+    "color": "orange",
     "space": {
-      "x": 3,
-      "y": 3
+      "x": 7,
+      "y": 1
     },
-    "heading": "EAST",
+    "heading": "SOUTH",
     "program": [
       {
         "card": {
@@ -347,11 +347,14 @@
         "visible": false
       },
       {
+        "card": {
+          "command": "OPTION_LEFT_RIGHT"
+        },
         "visible": false
       },
       {
         "card": {
-          "command": "FORWARD"
+          "command": "OPTION_LEFT_RIGHT"
         },
         "visible": false
       },
@@ -365,15 +368,6 @@
     "cards": [
       {
         "card": {
-          "command": "FAST_FORWARD"
-        },
-        "visible": true
-      },
-      {
-        "visible": true
-      },
-      {
-        "card": {
           "command": "FORWARD"
         },
         "visible": true
@@ -385,9 +379,15 @@
         "visible": true
       },
       {
+        "visible": true
+      },
+      {
         "card": {
-          "command": "FORWARD"
+          "command": "OPTION_LEFT_RIGHT"
         },
+        "visible": true
+      },
+      {
         "visible": true
       },
       {
@@ -403,7 +403,7 @@
     "energyCubes": 0,
     "spawnSpace": {
       "x": 0,
-      "y": 1
+      "y": 3
     }
   },
   "phase": "ACTIVATION",

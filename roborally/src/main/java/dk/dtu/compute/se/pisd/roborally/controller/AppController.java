@@ -131,21 +131,18 @@ public class AppController implements Observer {
     }
     public void saveGame() {
         Optional<String> result = Optional.empty();
-        if(gameName.equals("unnamed"))
-            result = showSaveGameDialog();
-
-        if(result.isEmpty())
-            return;
-        while(result.get().equals("")) {
-            if(showAlert("Please enter a name for the saved game or cancel the save").get() != ButtonType.OK) return;
-            result = showSaveGameDialog();
-            //additional break condition if the user doesn't want to save.
-            if(result.isEmpty()) return;
+        if(gameName.equals("unnamed")) {
+            do {
+                if(showAlert("Please enter a name for the saved game or cancel the save").get() != ButtonType.OK) return;
+                result = showSaveGameDialog();
+                //additional break condition if the user doesn't want to save.
+                if(result.isEmpty()) return;
+            } while(result.get().equals(""));
+            gameName = result.get();
         }
-        gameName = result.get();
 
-        if (Arrays.asList(LoadBoard.getTracks()).contains(gameName)) {
-            showAlert("Saving and overriding " + gameName);
+        if (Arrays.asList(LoadBoard.getActiveGames()).contains(gameName)) {
+            if(showAlert("Do you want to overwrite " + gameName + "?").get() != ButtonType.OK) return;
         }
 
         LoadBoard.saveCurrentGame(this.gameController.board, gameName);

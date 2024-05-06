@@ -232,7 +232,6 @@ public class LoadBoard {
         writeFile(template, filename, gson);
     }
     public static void saveCurrentGame(Board board, String name){
-        System.out.println("called");
         String filename = ACTIVEGAMES + File.separator + name + "." + JSON_EXT;
         GsonBuilder simpleBuilder = new GsonBuilder().
                 excludeFieldsWithoutExposeAnnotation().
