@@ -217,7 +217,7 @@ public class GameController {
                 CommandCard card = currentPlayer.getProgramField(step).getCard();
                 if (card != null) {
                     Command command = card.command;
-                    executeCommand(currentPlayer, command);
+                    executeCommand(currentPlayer, command, step);  // Correctly include the step as the register index
                 }
                 int nextPlayerNumber = board.getPlayerNumber(currentPlayer) + 1;
                 if (nextPlayerNumber < board.getPlayersNumber()) {
@@ -234,47 +234,69 @@ public class GameController {
                 }
             } else {
                 // this should not happen
-                assert false;
+                assert false : "Step index out of bounds";
             }
         } else {
             // this should not happen
-            assert false;
+            assert false : "Invalid game phase or current player is null";
         }
     }
 
-    private void executeCommand(@NotNull Player player, Command command) {
-        if (player != null && player.board == board && command != null) {
-            // XXX This is a very simplistic way of dealing with some basic cards and
-            //     their execution. This should eventually be done in a more elegant way
-            //     (this concerns the way cards are modelled as well as the way they are executed).
+    private void executeCommand(@NotNull Player player, Command command, int registerIndex) {
+        if (command == Command.AGAIN) {
+            if (registerIndex == 0) {
+                System.out.println("AGAIN cannot be used in the first register.");
+                return;  // Exit if 'AGAIN' is used in the first register
+            }
 
-            switch (command) {
-                case FORWARD:
-                    this.moveForward(player);
-                    break;
-                case RIGHT:
-                    this.turnRight(player);
-                    break;
-                case LEFT:
-                    this.turnLeft(player);
-                    break;
-                case FAST_FORWARD:
-                    this.fastForward(player);
-                    break;
-                case BACK:
-                    this.moveBack(player);
-                    break;
-                case SUPER_FORWARD:
-                    this.superForward(player);
-                    break;
-                case POWER_UP:
-                    player.addEnergyCubes(1);
-                default:
-                    // DO NOTHING (for now)
+            // Fetch the previous command and execute it if it's not null
+            Command previousCommand = getPreviousCommand(player, registerIndex - 1);
+            if (previousCommand != null && previousCommand != Command.DAMAGE) {
+                executeCommand(player, previousCommand, registerIndex); // Recursively execute the previous command
+            }
+            return; // Exit after handling AGAIN command
+        }
+
+        // Execute other commands
+        switch (command) {
+            case FORWARD:
+                moveForward(player);
+                break;
+            case RIGHT:
+                turnRight(player);
+                break;
+            case LEFT:
+                turnLeft(player);
+                break;
+            case FAST_FORWARD:
+                fastForward(player);
+                break;
+            case BACK:
+                moveBack(player);
+                break;
+            case SUPER_FORWARD:
+                superForward(player);
+                break;
+            case POWER_UP:
+                player.addEnergyCubes(1);
+                break;
+            default:
+                // DO NOTHING (for now)
+                break;
+        }
+    }
+
+
+    private Command getPreviousCommand(@NotNull Player player, int previousRegisterIndex) {
+        if (previousRegisterIndex >= 0) {
+            CommandCardField previousField = player.getProgramField(previousRegisterIndex);
+            CommandCard previousCard = previousField.getCard();
+            if (previousCard != null) {
+                return previousCard.getCommand();
             }
         }
+        return null; // No previous command or invalid index
     }
-
     public boolean moveCards(@NotNull CommandCardField source, @NotNull CommandCardField target) {
         CommandCard sourceCard = source.getCard();
         CommandCard targetCard = target.getCard();

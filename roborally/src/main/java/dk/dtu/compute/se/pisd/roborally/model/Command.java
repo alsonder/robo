@@ -46,7 +46,9 @@ public enum Command {
 
     OPTION_LEFT_RIGHT("Left OR Right", LEFT, RIGHT),
 
-    POWER_UP("Power Up");
+    POWER_UP("Power Up"),
+    AGAIN("Again"),
+    DAMAGE("Damage");
 
     final public String displayName;
 

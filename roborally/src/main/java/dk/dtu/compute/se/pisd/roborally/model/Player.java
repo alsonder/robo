@@ -127,15 +127,35 @@ public class Player extends Subject {
         }
     }
 
+    /**
+     * Returns the current total of energy cubes for the player.
+     *
+     * @return the number of energy cubes the player has
+     * @author Aleksander Sonder, s185289
+     */
     public int getEnergyCubes() {
         return energyCubes;
     }
 
+    /**
+     * Adds a specified amount of energy cubes to the player's current total.
+     *
+     * @param amount the number of energy cubes to add
+     * @author Aleksander Sonder, s185289
+     */
     public void addEnergyCubes(int amount) {
         this.energyCubes += amount;
         notifyChange();
     }
 
+    /**
+     * Uses a specified amount of energy cubes from the player's current total.
+     * If the player does not have enough energy cubes, an IllegalArgumentException is thrown.
+     *
+     * @param amount the number of energy cubes to use
+     * @throws IllegalArgumentException if the amount of energy cubes to use is greater than the player's current total
+     * @author Aleksander Sonder, s185289
+     */
     public void useEnergyCubes(int amount) {
         if (amount > this.energyCubes) {
             throw new IllegalArgumentException("Not enough energy cubes");
