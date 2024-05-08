@@ -160,6 +160,8 @@ public class LoadBoard {
             Space spawnSpace = board.getSpace(p.getSpawnSpace().x, p.getSpawnSpace().y);
             player.setSpawnSpace(spawnSpace);
 
+            player.addEnergyCubes(p.getEnergyCubes());
+
             //player.setCurrentCheckpoint(p.getCurrentCheckpoint());
 
             player.setHeading(p.getHeading());
