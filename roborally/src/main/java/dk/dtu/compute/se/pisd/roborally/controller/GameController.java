@@ -296,7 +296,17 @@ public class GameController {
         }
     }
 
-
+    /**
+     * This method retrieves the command from the card in the previous register of the player's program.
+     * If the previous register index is valid (greater than or equal to 0), it gets the card from the previous register.
+     * If the card exists, it returns the command of the card.
+     * If the previous register index is invalid or there is no card in the previous register, it returns null.
+     *
+     * @param player The player whose program's previous command is to be retrieved.
+     * @param previousRegisterIndex The index of the previous register in the player's program.
+     * @return The command of the card in the previous register if it exists, null otherwise.
+     * @author Aleksander Sonder, s185289
+     */
     private Command getPreviousCommand(@NotNull Player player, int previousRegisterIndex) {
         if (previousRegisterIndex >= 0) {
             CommandCardField previousField = player.getProgramField(previousRegisterIndex);
