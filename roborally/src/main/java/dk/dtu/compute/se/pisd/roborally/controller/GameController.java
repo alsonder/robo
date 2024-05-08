@@ -126,6 +126,16 @@ public class GameController {
         }
     }
 
+    /**
+     * Checks weather a player is moving into a wall or not
+     *
+     * @param player The player whose movement is being checked.
+     * @param newx The new x-coordinate after the movement.
+     * @param newy The new y-coordinate after the movement.
+     * @return {@code true} if the movement results in collision with a wall, {@code false} otherwise.
+     * @throws NullPointerException if {@code player} is {@code null}.
+     * @author Uffe
+     */
     public boolean wallCollition(@NotNull Player player, int newx, int newy) {
         if (player.getSpace().x + 1 <= player.board.width) {
             return (player.getSpace().x + 1 == newx && player.getSpace().y == newy); // if wall right return true

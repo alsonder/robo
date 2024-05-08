@@ -71,7 +71,7 @@ public class SpaceView extends StackPane implements ViewObserver {
         this.setMinHeight(SPACE_HEIGHT);
         this.setMaxHeight(SPACE_HEIGHT);
 
-        /*
+        /*      //for other maps later
         StartBoard.exexuteStartBoard(this, space);
         if (Objects.equals(Value.map, "GoldenStripe"))
             GoldStripe.executeGoldStripe(this, space);
@@ -79,10 +79,10 @@ public class SpaceView extends StackPane implements ViewObserver {
             WhirlWind.executeWhirlWind(this, space);
         else if (Objects.equals(Value.map, "RingOfDeath"))
             RingOfDeath.executeRingOfDeath(this, space);
-//        else if (Objects.equals(Value.map, "Testing"))
-//            TestingMap.executeTestMap(this, space);
+        else if (Objects.equals(Value.map, "Testing"))
+            TestingMap.executeTestMap(this, space);
         else GoldStripe.executeGoldStripe(this,space);
-*/
+        */
 
         if ((space.x + space.y) % 2 == 0) {
             paint(4,0);
@@ -92,7 +92,12 @@ public class SpaceView extends StackPane implements ViewObserver {
 
         // Path to the JSON file
         String filePath = "src/main/resources/boards/defaultboard.json";
-
+        /**
+         * Reads a JSON file from the specified file path, parses it, and processes it for painting the tiles.
+         *
+         * @param filePath The path to the JSON file to be read and processed.
+         * @author Uffe
+         */
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             // Read the JSON file as a string
             StringBuilder jsonStringBuilder = new StringBuilder();
@@ -213,20 +218,31 @@ public class SpaceView extends StackPane implements ViewObserver {
         }
     }
 
+    /**
+     * Sets the background image and position for a JavaFX node based on the resource board_tiles.jpg.
+     *
+     * @param x The x-coordinate of the image.
+     * @param y The y-coordinate of the image.
+     * @author Uffe
+     */
     private void paint(double x,double y){
         this.setStyle("-fx-background-image: url(board_tiles.jpg)" +
                 "; -fx-background-position: " + 16.5*x + "% " + 8.25*y + "%" + //16.6, 8.25
                 "; -fx-background-size: " + 430 + "px " + 793 + "px"
         );
     }
-
+    /**
+     * @deprecated This method has been deprecated and replaced with {@link #paint(double, double)}.
+     *             Use {@link #paint(double, double)} instead.
+     * @author Uffe
+     */
+    @Deprecated
     private void paintOn(double x,double y){
         ImageView overlayImageView = new ImageView(new Image("board_tiles.jpg"));
         overlayImageView.setFitWidth(430); // Set the width of the overlay image
         overlayImageView.setFitHeight(793); // Set the height of the overlay image
         overlayImageView.setX(x * getWidth() / 100); // Convert percentage to pixels
         overlayImageView.setY(y * getHeight() / 100); // Convert percentage to pixels
-
         this.getChildren().add(overlayImageView);
     }
 }
