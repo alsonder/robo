@@ -35,10 +35,16 @@ import java.util.List;
  */
 public class SpaceTemplate {
 
-    public List<Heading> walls = new ArrayList<>();
-    public List<FieldAction> actions = new ArrayList<>();
-
+    public List<Heading> walls;
+    public List<FieldAction> actions;
     public int x;
     public int y;
+
+    public SpaceTemplate(int x, int y, List<Heading> walls, List<FieldAction> actions) {
+        this.x = x;
+        this.y = y;
+        this.walls = walls;
+        this.actions = actions;
+    }
 
 }

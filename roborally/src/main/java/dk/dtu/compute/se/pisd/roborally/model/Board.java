@@ -21,6 +21,7 @@
  */
 package dk.dtu.compute.se.pisd.roborally.model;
 
+import com.google.gson.annotations.Expose;
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,16 +45,20 @@ public class Board extends Subject {
     private Integer gameId;
 
     private final Space[][] spaces;
-
+    @Expose
     private final List<Player> players = new ArrayList<>();
-
+    @Expose
     private Player current;
-
+    @Expose
     private Phase phase = INITIALISATION;
-
+    @Expose
     private int step = 0;
-
+    @Expose
     private boolean stepMode;
+    @Expose
+    private List<Space> spawnSpaces = new ArrayList<>();
+    @Expose
+    private String map = "defaultboard";
 
     public Board(int width, int height) {
         this.width = width;
@@ -109,6 +114,8 @@ public class Board extends Subject {
             return null;
         }
     }
+
+    public List<Player> getPlayers(){return players;}
 
     public Player getCurrentPlayer() {
         return current;
@@ -210,8 +217,53 @@ public class Board extends Subject {
         return result;
     }
 
-    public String getStatusMessage() {
+    /**
+     * This method returns a status message based on the current phase of the game.
+     * The phases are as follows:
+     * - INITIALISATION: The game is in the setup phase, players are placing their robots on the board.
+     * - PROGRAMMING: Players are choosing their cards for the round.
+     * - ACTIVATION: The robots are moving based on the chosen cards.
+     * - PLAYER_INTERACTION: A player needs to make a choice, such as resolving a conflict.
+     * - default: The game is in an idle state, waiting for the next phase to start.
+     *
+     * @return A string containing the status message for the current phase.
+     * @author Aleksander Sonder, s185289
+     */
 
-        return "";
+    public String getStatusMessage() {
+        switch (getPhase()) {
+            case INITIALISATION:
+                return "Initialization phase: Place your robots on the board.";
+            case PROGRAMMING:
+                return "Programming phase: Choose your cards.";
+            case ACTIVATION:
+                return "Activation phase: Watch the robots move!";
+            case PLAYER_INTERACTION:
+                return "Interaction required: Make your choice!";
+            default:
+                return "Waiting for next phase...";
+        }
+    }
+    public void setMap(String m) {
+        map = m;
+    }
+
+    public String getMap() {
+        return map;
+    }
+
+    public void addSpawnSpace(Space space) {spawnSpaces.add(space);}
+
+    public List<Space> getSpawnSpaces(){return spawnSpaces;}
+    public void setSpawnSpacesDefault(int maxPlayer) {
+        int x = 0,y = 0;
+        for (int i = 0; i < maxPlayer; i++) {
+            spawnSpaces.add(spaces[x][y]);
+            y++;
+            if(i >= height){
+                y = 0;
+                x++;
+            }
+        }
     }
 }

@@ -26,6 +26,7 @@ import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
 
 import dk.dtu.compute.se.pisd.roborally.RoboRally;
 
+import dk.dtu.compute.se.pisd.roborally.fileaccess.LoadBoard;
 import dk.dtu.compute.se.pisd.roborally.model.Board;
 import dk.dtu.compute.se.pisd.roborally.model.Player;
 
@@ -34,6 +35,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.TextInputDialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -55,6 +57,7 @@ public class AppController implements Observer {
 
     private GameController gameController;
 
+    private String gameName = "unnamed";
     public AppController(@NotNull RoboRally roboRally) {
         this.roboRally = roboRally;
     }
@@ -76,13 +79,17 @@ public class AppController implements Observer {
 
             // XXX the board should eventually be created programmatically or loaded from a file
             //     here we just create an empty board with the required number of players.
-            Board board = new Board(8,8);
+            Board board = LoadBoard.loadBoard("defaultboard");
+
             gameController = new GameController(board);
             int no = result.get();
+            board.setSpawnSpacesDefault(no);
             for (int i = 0; i < no; i++) {
                 Player player = new Player(board, PLAYER_COLORS.get(i), "Player " + (i + 1));
                 board.addPlayer(player);
-                player.setSpace(board.getSpace(i % board.width, i));
+                player.setSpawnSpace(board.getSpawnSpaces().get(i));
+                player.setSpace(player.getSpawnSpace());
+
             }
 
             // XXX: V2
@@ -92,17 +99,77 @@ public class AppController implements Observer {
             roboRally.createBoardView(gameController);
         }
     }
+    private Optional<ButtonType> showAlert(String message) {
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setHeaderText(message);
+        return alert.showAndWait();
+    }
+    private String selectBoard(String[] boards) {
 
-    public void saveGame() {
-        // XXX needs to be implemented eventually
+        if (boards == null || boards.length == 0) {
+            showAlert("No tracks");
+            return null;
+        }
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(boards[0], boards);
+        dialog.setTitle("Track selection");
+        dialog.setHeaderText("Pick a track");
+        Optional<String> result = dialog.showAndWait();
+        String track = "";
+        if (result.isPresent()) {
+            track = result.get();
+            System.out.println("Track chosen: " + track);
+        }
+        return track;
     }
 
-    public void loadGame() {
-        // XXX needs to be implemented eventually
-        // for now, we just create a new game
-        if (gameController == null) {
-            newGame();
+    private Optional<String> showSaveGameDialog() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Save game");
+        dialog.setHeaderText("Save As");
+        return dialog.showAndWait();
+    }
+    public void saveGame() {
+        Optional<String> result = Optional.empty();
+        if(gameName.equals("unnamed")) {
+            do {
+                if(showAlert("Please enter a name for the saved game or cancel the save").get() != ButtonType.OK) return;
+                result = showSaveGameDialog();
+                //additional break condition if the user doesn't want to save.
+                if(result.isEmpty()) return;
+            } while(result.get().equals(""));
+            gameName = result.get();
         }
+
+        if (Arrays.asList(LoadBoard.getActiveGames()).contains(gameName)) {
+            if(showAlert("Do you want to overwrite " + gameName + "?").get() != ButtonType.OK) return;
+        }
+
+        LoadBoard.saveCurrentGame(this.gameController.board, gameName);
+        System.out.println("Saved as " + gameName);
+
+    }
+
+
+
+    public void loadGame() {
+
+        String track = selectBoard(LoadBoard.getActiveGames());
+
+        if (track == null || track.isEmpty()) {
+            showAlert("Could not load game");
+            return;
+        }
+
+        Board board = LoadBoard.loadActiveBoard(track);
+        if (board == null) {
+            showAlert("Could not load game");
+            return;
+        }
+
+        gameController = new GameController(board);
+        roboRally.createBoardView(gameController);
+        gameName = track;
     }
 
     /**
