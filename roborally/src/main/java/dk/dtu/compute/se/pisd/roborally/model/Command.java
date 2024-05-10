@@ -51,7 +51,7 @@ public enum Command {
 
     // Special programming cards
     OPTION_LEFT_RIGHT("Left or Right", TURNLEFT, TURNRIGHT),
-    SANDBOX("SANDBOX", MOVE1, MOVE2, MOVE3, TURNRIGHT, TURNLEFT, MOVEBACK),
+    SANDBOX("SANDBOX", MOVE1, MOVE2, MOVE3, TURNRIGHT, TURNLEFT, MOVEBACK, UTURN),
     DAMAGE("Damage");
 
 
