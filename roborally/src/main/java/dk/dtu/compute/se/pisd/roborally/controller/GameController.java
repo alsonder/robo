@@ -47,7 +47,7 @@ public class GameController {
 
 
 
-    public void moveForward(@NotNull Player player) {
+    public void move1(@NotNull Player player) {
         if (player.board == board) {
             Space space = player.getSpace();
             Heading heading = player.getHeading();
@@ -66,15 +66,15 @@ public class GameController {
     }
 
     // TODO Assignment A3
-    public void fastForward(@NotNull Player player) {
+    public void move2(@NotNull Player player) {
         for (int i = 0; i < 2; i++) {
-            moveForward(player);
+            move1(player);
         }
     }
 
-    public void superForward(@NotNull Player player){
+    public void move3(@NotNull Player player){
         for (int i = 0; i < 3; i++) {
-            moveForward(player);
+            move1(player);
         }
     }
 
@@ -340,23 +340,23 @@ public class GameController {
 
         // Execute other commands
         switch (command) {
-            case FORWARD:
-                moveForward(player);
+            case MOVE1:
+                move1(player);
                 break;
-            case RIGHT:
+            case TURNRIGHT:
                 turnRight(player);
                 break;
-            case LEFT:
+            case TURNLEFT:
                 turnLeft(player);
                 break;
-            case FAST_FORWARD:
-                fastForward(player);
+            case MOVE2:
+                move2(player);
                 break;
-            case BACK:
+            case MOVEBACK:
                 moveBack(player);
                 break;
-            case SUPER_FORWARD:
-                superForward(player);
+            case MOVE3:
+                move3(player);
                 break;
             case POWER_UP:
                 player.addEnergyCubes(1);
