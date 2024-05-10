@@ -42,6 +42,8 @@ public class Board extends Subject {
 
     public final int height;
 
+    public final int numberOfCheckPoints;
+
     private Integer gameId;
 
     private final Space[][] spaces;
@@ -60,9 +62,10 @@ public class Board extends Subject {
     @Expose
     private String map = "defaultboard";
 
-    public Board(int width, int height) {
+    public Board(int width, int height, int numberOfCheckPoints) {
         this.width = width;
         this.height = height;
+        this.numberOfCheckPoints = numberOfCheckPoints;
         spaces = new Space[width][height];
         for (int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {

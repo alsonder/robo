@@ -71,7 +71,7 @@ public class LoadBoard {
             reader = gson.newJsonReader(new FileReader(file));
             BoardTemplate template = gson.fromJson(reader, BoardTemplate.class);
 
-            result = new Board(template.width, template.height);
+            result = new Board(template.width, template.height, template.numberOfCheckPoints);
 
             for (SpaceTemplate spaceTemplate: template.spawnSpaces) {
                 Space space = result.getSpace(spaceTemplate.x, spaceTemplate.y);

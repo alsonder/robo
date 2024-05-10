@@ -48,6 +48,8 @@ public enum Command {
 
     OPTION_LEFT_RIGHT("Left OR Right", LEFT, RIGHT),
 
+    SANDBOX("SANDBOX", FORWARD, FAST_FORWARD, SUPER_FORWARD, RIGHT, LEFT, BACK),
+
     POWER_UP("Power Up"),
     AGAIN("Again"),
     DAMAGE("Damage");

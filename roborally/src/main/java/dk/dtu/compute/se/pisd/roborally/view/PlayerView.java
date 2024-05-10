@@ -141,7 +141,8 @@ public class PlayerView extends Tab implements ViewObserver {
     @Override
     public void updateView(Subject subject) {
         if (subject == player.board) {
-            energyCubesLabel.setText("Energy Cubes: " + player.getEnergyCubes());
+            energyCubesLabel.setText("Energy Cubes: " + player.getEnergyCubes() + "\n" +
+                "Check Points: " + player.getCeckPoint());
             for (int i = 0; i < Player.NO_REGISTERS; i++) {
                 CardFieldView cardFieldView = programCardViews[i];
                 if (cardFieldView != null) {
@@ -206,19 +207,15 @@ public class PlayerView extends Tab implements ViewObserver {
                 playerInteractionPanel.getChildren().clear();
 
                 if (player.board.getCurrentPlayer() == player) {
-                    // TODO Assignment A3: these buttons should be shown only when there is
-                    //      an interactive command card, and the buttons should represent
-                    //      the player's choices of the interactive command card. The
-                    //      following is just a mockup showing two options
-                    Button optionButton = new Button("Option1");
-                    optionButton.setOnAction( e -> gameController.notImplemented());
-                    optionButton.setDisable(false);
-                    playerInteractionPanel.getChildren().add(optionButton);
-
-                    optionButton = new Button("Option 2");
-                    optionButton.setOnAction( e -> gameController.notImplemented());
-                    optionButton.setDisable(false);
-                    playerInteractionPanel.getChildren().add(optionButton);
+                    Command command = player.getProgramField(player.board.getStep()).getCard().command;
+                    if (command.isInteractive()){
+                        for(Command option : command.getOptions()){
+                            Button optionButton = new Button(option.displayName);
+                            optionButton.setOnAction( e -> gameController.executeCommandOptionAndContinue(option));
+                            optionButton.setDisable(false);
+                            playerInteractionPanel.getChildren().add(optionButton);
+                        }
+                    }
                 }
             }
         }
