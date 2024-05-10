@@ -132,6 +132,9 @@ public class GameController {
             }
         }
     }
+    public void uTurn(@NotNull Player player){
+        player.setHeading(player.getHeading().next().next());
+    }
 
     /**
      * Then a player chooses one of the options on a option command card
@@ -361,6 +364,8 @@ public class GameController {
             case POWER_UP:
                 player.addEnergyCubes(1);
                 break;
+            case UTURN:
+                uTurn(player);
             default:
                 // DO NOTHING (for now)
                 break;
