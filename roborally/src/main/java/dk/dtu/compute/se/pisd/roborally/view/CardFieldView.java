@@ -32,6 +32,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -66,6 +67,8 @@ public class CardFieldView extends GridPane implements ViewObserver {
     private Label label;
 
     private GameController gameController;
+    private ImageView imageView;
+
 
     public CardFieldView(@NotNull GameController gameController, @NotNull CommandCardField field) {
         this.gameController = gameController;
@@ -84,10 +87,11 @@ public class CardFieldView extends GridPane implements ViewObserver {
         this.setMinHeight(CARDFIELD_HEIGHT);
         this.setMaxHeight(CARDFIELD_HEIGHT);
 
-        label = new Label("This is a slightly longer text");
-        label.setWrapText(true);
-        label.setMouseTransparent(true);
-        this.add(label, 0, 0);
+        imageView = new ImageView();
+        imageView.setFitWidth(CARDFIELD_WIDTH);
+        imageView.setFitHeight(CARDFIELD_HEIGHT);
+        imageView.setMouseTransparent(true);
+        this.add(imageView, 0, 0);
 
         this.setOnDragDetected(new OnDragDetectedHandler());
         this.setOnDragOver(new OnDragOverHandler());
@@ -140,14 +144,16 @@ public class CardFieldView extends GridPane implements ViewObserver {
         return null;
     }
 
+
     @Override
     public void updateView(Subject subject) {
         if (subject == field && subject != null) {
             CommandCard card = field.getCard();
             if (card != null && field.isVisible()) {
-                label.setText(card.getName());
+                Image image = new Image(getClass().getResource("/graphics/" + card.getName() + ".png").toExternalForm());
+                imageView.setImage(image);
             } else {
-                label.setText("");
+                imageView.setImage(null);
             }
         }
     }

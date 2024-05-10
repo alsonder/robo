@@ -38,21 +38,21 @@ public enum Command {
     // This is a very simplistic way of realizing different commands.
 
     // Programming cards
-    MOVE1("Move 1"),
-    MOVE2("Move 2"),
-    MOVE3("Move 3"),
-    TURNRIGHT("Turn Right"),
-    TURNLEFT("Turn Left"),
-    UTURN("U-Turn"),
-    MOVEBACK("Move Back"),
-    POWER_UP("Power Up"),
-    AGAIN("Again"),
+    MOVE1("move1"),
+    MOVE2("move2"),
+    MOVE3("move3"),
+    TURNRIGHT("turnRight"),
+    TURNLEFT("turnLeft"),
+    UTURN("uTurn"),
+    MOVEBACK("moveBack"),
+    POWER_UP("powerUp"),
+    AGAIN("again"),
 
 
     // Special programming cards
-    OPTION_LEFT_RIGHT("Left or Right", TURNLEFT, TURNRIGHT),
-    SANDBOX("SANDBOX", MOVE1, MOVE2, MOVE3, TURNRIGHT, TURNLEFT, MOVEBACK, UTURN),
-    DAMAGE("Damage");
+    RIGHT_LEFT("rightLeft", TURNLEFT, TURNRIGHT),
+    SANDBOX_ROUTINE("sandboxRoutine", MOVE1, MOVE2, MOVE3, TURNRIGHT, TURNLEFT, MOVEBACK, UTURN),
+    DAMAGE("damage");
 
 
     @Expose
