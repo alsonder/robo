@@ -56,6 +56,8 @@ public class Player extends Subject {
     @Expose
     private Space spawnSpace;
 
+    private int checkPoint = 0;
+
     public Player(@NotNull Board board, String color, @NotNull String name) {
         this.board = board;
         this.name = name;
@@ -180,6 +182,24 @@ public class Player extends Subject {
         }
         this.energyCubes -= amount;
         notifyChange();
+    }
+
+    /**
+     * get the number of check points visited
+     * by a player
+     * @return The number of check points a player have
+     * @author Anders
+     */
+    public int getCeckPoint(){return checkPoint;}
+
+    /**
+     * then a player lands on a check point,
+     * this is called to update their number
+     * of check points
+     * @author Anders
+     */
+    public void updateCheckPoint(){
+        checkPoint +=1;
     }
 
     public CommandCardField getProgramField(int i) {

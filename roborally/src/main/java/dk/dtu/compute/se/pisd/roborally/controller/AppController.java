@@ -81,7 +81,7 @@ public class AppController implements Observer {
             //     here we just create an empty board with the required number of players.
             Board board = LoadBoard.loadBoard("defaultboard");
 
-            gameController = new GameController(board);
+            gameController = new GameController(this, board);
             int no = result.get();
             board.setSpawnSpacesDefault(no);
             for (int i = 0; i < no; i++) {
@@ -167,7 +167,7 @@ public class AppController implements Observer {
             return;
         }
 
-        gameController = new GameController(board);
+        gameController = new GameController(this, board);
         roboRally.createBoardView(gameController);
         gameName = track;
     }

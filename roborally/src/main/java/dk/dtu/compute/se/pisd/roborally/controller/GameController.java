@@ -22,7 +22,10 @@
 package dk.dtu.compute.se.pisd.roborally.controller;
 
 import dk.dtu.compute.se.pisd.roborally.model.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import org.jetbrains.annotations.NotNull;
+import java.util.Optional;
 
 /**
  * ...
@@ -32,11 +35,15 @@ import org.jetbrains.annotations.NotNull;
  */
 public class GameController {
 
+    final public AppController appController;
+
     final public Board board;
 
-    public GameController(Board board) {
+    public GameController(AppController appController, Board board) {
+        this.appController = appController;
         this.board = board;
     }
+
 
 
 
@@ -123,6 +130,59 @@ public class GameController {
                 }
 
             }
+        }
+    }
+
+    /**
+     * Then a player chooses one of the options on a option command card
+     * that option is executed through this method, which then continues the
+     * game after the interaction.
+     * @param option the command cards specific option name
+     * @author Anders
+     */
+    public void executeCommandOptionAndContinue(Command option){
+        int step = board.getStep();
+        Player currentPlayer = board.getCurrentPlayer();
+        executeCommand(currentPlayer, option, step);
+        board.setPhase(Phase.ACTIVATION);
+        int nextPlayerNumber = board.getPlayerNumber(currentPlayer) + 1;
+        if (nextPlayerNumber < board.getPlayersNumber()) {
+            board.setCurrentPlayer(board.getPlayer(nextPlayerNumber));
+        } else {
+            step++;
+            if (step < Player.NO_REGISTERS) {
+                makeProgramFieldsVisible(step);
+                board.setStep(step);
+                board.setCurrentPlayer(board.getPlayer(0));
+            } else {
+                for(Player player:board.getPlayers()){
+                    Space space = player.getSpace();
+                    for(FieldAction action: space.getActions()){
+                        action.doAction(this, space);
+                    }
+                }
+                gameWon();
+                startProgrammingPhase();
+            }
+        }
+    }
+
+    /**
+     * Ends the game then called, should only be then a player
+     * have been to all the checkpoint on the course,
+     * then shows a popup window with the winner
+     * @author Anders
+     */
+    private void gameWon(){
+        if(board.getPhase() == Phase.GAME_WON){
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("GAME Finished");
+            String winningPlayer = board.getPlayers().stream()
+                    .filter(p -> p.getCeckPoint() == board.numberOfCheckPoints)
+                    .findFirst().get().getName();
+            alert.setContentText(winningPlayer + " has won the game");
+            Optional<ButtonType> result = alert.showAndWait();
+            appController.stopGame();
         }
     }
 
@@ -227,6 +287,10 @@ public class GameController {
                 CommandCard card = currentPlayer.getProgramField(step).getCard();
                 if (card != null) {
                     Command command = card.command;
+                    if(command.isInteractive()){
+                        board.setPhase(Phase.PLAYER_INTERACTION);
+                        return;
+                    }
                     executeCommand(currentPlayer, command, step);  // Correctly include the step as the register index
                 }
                 int nextPlayerNumber = board.getPlayerNumber(currentPlayer) + 1;
@@ -239,6 +303,13 @@ public class GameController {
                         board.setStep(step);
                         board.setCurrentPlayer(board.getPlayer(0));
                     } else {
+                        for(Player player:board.getPlayers()){
+                            Space space = player.getSpace();
+                            for(FieldAction action: space.getActions()){
+                                action.doAction(this, space);
+                            }
+                        }
+                        gameWon();
                         startProgrammingPhase();
                     }
                 }

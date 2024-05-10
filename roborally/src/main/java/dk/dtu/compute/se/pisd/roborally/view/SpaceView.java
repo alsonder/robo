@@ -150,20 +150,35 @@ public class SpaceView extends StackPane implements ViewObserver {
                                     }
                                     System.out.println("set wall on " + wall.getAsString() + " facing me");
                                 }
-                            System.out.println("set on "+x+","+y+" : "+ className+" "+instanceObject.getAsJsonPrimitive("heading").getAsString());
-
-                            // down right left up
-                            if (instanceObject!=null && space.x == x && space.y == y){
-                                if (Objects.equals(instanceObject.getAsJsonPrimitive("heading").getAsString(), "SOUTH"))
-                                    paint(1,6);
-                                else if (Objects.equals(instanceObject.getAsJsonPrimitive("heading").getAsString(), "EAST"))
-                                    paint(3,6);
-                                else if (Objects.equals(instanceObject.getAsJsonPrimitive("heading").getAsString(), "WEST"))
-                                    paint(2,6);
-                                else if (Objects.equals(instanceObject.getAsJsonPrimitive("heading").getAsString(), "NORTH"))
-                                    paint(0,6);
+                            if (className.equals("ConveyorBelt")){
+                                System.out.println("set on "+x+","+y+" : "+ className+" "+instanceObject.getAsJsonPrimitive("heading").getAsString());
+                                if (space.x == x && space.y == y){
+                                    if (Objects.equals(instanceObject.getAsJsonPrimitive("heading").getAsString(), "SOUTH"))
+                                        paint(1,6);
+                                    else if (Objects.equals(instanceObject.getAsJsonPrimitive("heading").getAsString(), "EAST"))
+                                        paint(3,6);
+                                    else if (Objects.equals(instanceObject.getAsJsonPrimitive("heading").getAsString(), "WEST"))
+                                        paint(2,6);
+                                    else if (Objects.equals(instanceObject.getAsJsonPrimitive("heading").getAsString(), "NORTH"))
+                                        paint(0,6);
+                                }
+                            }
+                            else if (className.equals("CheckPoint")){
+                                if (space.x == x && space.y == y) {
+                                    if (instanceObject.getAsJsonPrimitive("number").getAsNumber().intValue() == 1)
+                                        paint(1, 11);
+                                    else if (instanceObject.getAsJsonPrimitive("number").getAsNumber().intValue() == 2)
+                                        paint(2, 11);
+                                    else if (instanceObject.getAsJsonPrimitive("number").getAsNumber().intValue() == 3)
+                                        paint(3, 11);
+                                    else if (instanceObject.getAsJsonPrimitive("number").getAsNumber().intValue() == 4)
+                                        paint(1, 12);
+                                    else if (instanceObject.getAsJsonPrimitive("number").getAsNumber().intValue() == 5)
+                                        paint(0, 12);
+                                }
                             }
 
+                            // down right left up
 
                             // Print a separator for clarity
                             System.out.println("-----------------------------------");

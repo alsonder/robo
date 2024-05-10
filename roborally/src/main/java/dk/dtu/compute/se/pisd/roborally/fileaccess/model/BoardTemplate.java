@@ -36,6 +36,8 @@ public class BoardTemplate {
     public int width;
     public int height;
 
+    public int numberOfCheckPoints;
+
     public List<SpaceTemplate> spaces = new ArrayList<>();
 
     public List<SpaceTemplate> spawnSpaces = new ArrayList<>();
