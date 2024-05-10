@@ -37,22 +37,24 @@ public enum Command {
 
     // This is a very simplistic way of realizing different commands.
 
-    FORWARD("Fwd"),
-    RIGHT("Turn Right"),
-    LEFT("Turn Left"),
-    FAST_FORWARD("Fast Fwd"),
-
-    SUPER_FORWARD("Super Fwd"),
-
-    BACK("Move Back"),
-
-    OPTION_LEFT_RIGHT("Left OR Right", LEFT, RIGHT),
-
-    SANDBOX("SANDBOX", FORWARD, FAST_FORWARD, SUPER_FORWARD, RIGHT, LEFT, BACK),
-
+    // Programming cards
+    MOVE1("Move 1"),
+    MOVE2("Move 2"),
+    MOVE3("Move 3"),
+    TURNRIGHT("Turn Right"),
+    TURNLEFT("Turn Left"),
+    UTURN("U-Turn"),
+    MOVEBACK("Move Back"),
     POWER_UP("Power Up"),
     AGAIN("Again"),
+
+
+    // Special programming cards
+    OPTION_LEFT_RIGHT("Left or Right", TURNLEFT, TURNRIGHT),
+    SANDBOX("SANDBOX", MOVE1, MOVE2, MOVE3, TURNRIGHT, TURNLEFT, MOVEBACK),
     DAMAGE("Damage");
+
+
     @Expose
     final public String displayName;
 
