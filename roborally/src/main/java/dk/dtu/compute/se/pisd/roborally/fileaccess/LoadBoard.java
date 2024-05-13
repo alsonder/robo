@@ -34,9 +34,12 @@ import java.io.*;
 import java.util.List;
 
 /**
- * ...
+ * Provides functionality to load and save game boards and active game states for the RoboRally board game.
+ * This class includes methods to load boards from JSON files, save game boards and active games to JSON,
+ * and retrieve lists of available game tracks and active games. This class utilizes Google Gson for JSON processing.
  *
  * @author Ekkart Kindler, ekki@dtu.dk
+ * @author William Aslak Tonning, s205838
  */
 public class LoadBoard {
 
@@ -47,6 +50,13 @@ public class LoadBoard {
     private static final String BOARDSFOLDER = PATH_TO_RES + "boards";
     private static final String ACTIVEGAMES = PATH_TO_RES + "activeGames";
 
+    /**
+     * Loads a board configuration from a JSON file. If the specified board name is not found, it defaults to loading
+     * the defaultboard. This method creates the board from the templates shown under the model folder.
+     *
+     * @param boardName The name of the file you wish to load which is kept undre resources/boards/
+     * @return An initialized {@link Board} object, or null if an error occurs during file loading.
+     */
     public static Board loadBoard(String boardName) {
 
         if (boardName == null) {
@@ -102,7 +112,14 @@ public class LoadBoard {
     }
 
 
-
+    /**
+     * Loads an active board game state from a JSON file. This includes the boardName, players, their states, and the game
+     * phase. If the board game file is not found, this method returns null.
+     * It will call the previous function (loadBoard) with the loaded boardName which will return null if an error occured.
+     *
+     * @param activeGameName The name of the active game file to load.
+     * @return An initialized {@link Board} with the current game state, or null if the file does not exist.
+     */
     public static Board loadActiveBoard(String activeGameName){
         File file = new File(ACTIVEGAMES + File.separator + activeGameName + "." + JSON_EXT);
 
@@ -178,6 +195,11 @@ public class LoadBoard {
         return board;
     }
 
+    /**
+     * Retrieves the names of all available tracks stored in the resources folder.
+     *
+     * @return An array of string representing the names of all stored boards, or null if no files are found.
+     */
     public static String[] getTracks(){
 
         File folder = new File(BOARDSFOLDER);
@@ -190,6 +212,11 @@ public class LoadBoard {
             files[i] = folder.listFiles()[i].getName().substring(0,folder.listFiles()[i].getName().length()-5);
         return files;
     }
+    /**
+     * Very similar to the previous function with it returning the activeGames instead.
+     *
+     * @return An array of string representing the names of all stored active games, or null if no files are found.
+     */
     public static String[] getActiveGames(){
         File folder = new File(ACTIVEGAMES);
 
@@ -202,7 +229,14 @@ public class LoadBoard {
 
     }
 
-
+    /**
+     * Saves the {@link Board} template as a JSON file in the 'boards' directory under resources. This includes
+     * spaces and their properties such as walls and actions.
+     * This is used when creating a new map.
+     *
+     * @param board The {@link Board} to save.
+     * @param name The name under which to save the board file.
+     */
     public static void saveBoard(Board board, String name) {
         BoardTemplate template = new BoardTemplate();
         template.width = board.width;
@@ -232,6 +266,13 @@ public class LoadBoard {
 
         writeFile(template, filename, gson);
     }
+    /**
+     * Saves the current game state as a JSON file in the 'activeGames' directory under resources. This includes the board's
+     * state and all player details.
+     *
+     * @param board The {@link Board} representing the current game state.
+     * @param name The name under which to save the active game file.
+     */
     public static void saveCurrentGame(Board board, String name){
         String filename = ACTIVEGAMES + File.separator + name + "." + JSON_EXT;
         GsonBuilder simpleBuilder = new GsonBuilder().
@@ -241,7 +282,14 @@ public class LoadBoard {
 
         writeFile(board, filename, gson);
     }
-
+    /**
+     * Generic function to write an object to a file in the JSON format using Gson. Handles file operations and JSON writing.
+     *
+     * @param <T> The type of the object to write.
+     * @param object The object to serialize to JSON.
+     * @param filename The path and filename where the JSON will be saved.
+     * @param gson The Gson instance configured for this serialization.
+     */
     private static  <T> void writeFile(T object, String filename, Gson gson) {
         try (FileWriter fileWriter = new FileWriter(filename);
              JsonWriter writer = gson.newJsonWriter(fileWriter)) {
