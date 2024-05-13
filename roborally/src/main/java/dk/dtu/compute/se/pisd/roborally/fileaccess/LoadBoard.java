@@ -162,10 +162,9 @@ public class LoadBoard {
 
             player.addEnergyCubes(p.getEnergyCubes());
 
-            //player.setCurrentCheckpoint(p.getCurrentCheckpoint());
+            player.setCheckPoint(p.getCheckPoint());
 
             player.setHeading(p.getHeading());
-
             board.addPlayer(player);
 
             if(player.getName().equals(current.getName()))

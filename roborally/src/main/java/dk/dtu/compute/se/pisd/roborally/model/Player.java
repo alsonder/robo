@@ -55,7 +55,7 @@ public class Player extends Subject {
     private int energyCubes;
     @Expose
     private Space spawnSpace;
-
+    @Expose
     private int checkPoint = 0;
 
     public Player(@NotNull Board board, String color, @NotNull String name) {
@@ -190,7 +190,7 @@ public class Player extends Subject {
      * @return The number of check points a player have
      * @author Anders
      */
-    public int getCeckPoint(){return checkPoint;}
+    public int getCheckPoint(){return checkPoint;}
 
     /**
      * then a player lands on a check point,
@@ -201,6 +201,8 @@ public class Player extends Subject {
     public void updateCheckPoint(){
         checkPoint +=1;
     }
+
+    public void setCheckPoint(int n){checkPoint = n;}
 
     public CommandCardField getProgramField(int i) {
         return program[i];

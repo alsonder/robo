@@ -181,7 +181,7 @@ public class GameController {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("GAME Finished");
             String winningPlayer = board.getPlayers().stream()
-                    .filter(p -> p.getCeckPoint() == board.numberOfCheckPoints)
+                    .filter(p -> p.getCheckPoint() == board.numberOfCheckPoints)
                     .findFirst().get().getName();
             alert.setContentText(winningPlayer + " has won the game");
             Optional<ButtonType> result = alert.showAndWait();

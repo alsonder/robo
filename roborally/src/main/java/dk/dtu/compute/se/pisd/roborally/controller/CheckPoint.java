@@ -29,9 +29,9 @@ public class CheckPoint extends FieldAction{
     @Override
     public boolean doAction(GameController gameController, Space space) {
         Player player = space.getPlayer();
-        if(player.getCeckPoint() == number -1){
+        if(player.getCheckPoint() == number -1){
             player.updateCheckPoint();
-            if(gameController.board.numberOfCheckPoints == player.getCeckPoint()){
+            if(gameController.board.numberOfCheckPoints == player.getCheckPoint()){
                 gameController.board.setPhase(Phase.GAME_WON);
             }
             return true;
