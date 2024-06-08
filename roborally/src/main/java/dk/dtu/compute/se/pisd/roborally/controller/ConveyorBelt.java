@@ -45,19 +45,28 @@ public class ConveyorBelt extends FieldAction {
         this.heading = heading;
     }
 
+    /**
+     * Takes the fieldAction for conveyor belts, and then check if a player is on that field
+     * then do the action stated in the doAction method, which here moves the player in the
+     * direction the conveyor belts heading.
+     * @param gameController the controller that uses all game logic
+     * @param space the space there the checkpoint, is checked if a player is there
+     * @return returns true if a player is on the space false otherwise
+     * @author Anders Jensen
+     */
     @Override
     public boolean doAction(@NotNull GameController gameController, @NotNull Space space) {
         Player player = space.getPlayer();
 
-        if(space.getPlayer() == player){
+        if(space.getPlayer() == player) {
             Heading tempHeading = player.getHeading();
             player.setHeading(heading);
             gameController.move1(player);
             player.setHeading(tempHeading);
+            return true;
+        }
 
-        }return true;
-
-
+        return false;
     }
 
 }
