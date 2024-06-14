@@ -64,6 +64,20 @@ public class AppController implements Observer {
         this.roboRally = roboRally;
     }
 
+
+
+
+    public void joinServer(){
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Insert Ip of server");
+        Optional<String> result = dialog.showAndWait();
+        ClientController clientController = new ClientController(this);
+
+        if(result.isPresent()){
+            clientController.connectServer(result.get());
+            joinedServerChoices();
+        }
+    }
     private void joinedServerChoices(){
         String choice = null;
         ChoiceDialog<String> dialog = new ChoiceDialog<>();
@@ -74,17 +88,6 @@ public class AppController implements Observer {
         String track = "";
 
 
-    }
-
-
-    public void joinServer(){
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Insert Ip of server");
-        Optional<String> result = dialog.showAndWait();
-
-        if(result.isPresent()){
-            joinedServerChoices();
-        }
     }
 
     public void newGame() {
