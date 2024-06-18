@@ -22,9 +22,16 @@
 package dk.dtu.compute.se.pisd.roborally.controller;
 
 import dk.dtu.compute.se.pisd.roborally.model.*;
+import dk.dtu.compute.se.pisd.roborally.rest.ClientWebSoc;
+import dk.dtu.compute.se.pisd.roborally.rest.UpdateResponse;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import org.jetbrains.annotations.NotNull;
+
+import javax.websocket.EncodeException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 /**
@@ -272,6 +279,19 @@ public class GameController {
     }
 
     public void executeStep() {
+        /*String uri = "ws://192.168.0.208:8080/websocket-endpoint"; // Replace with your WebSocket endpoint
+        ClientWebSoc client = new ClientWebSoc();
+        client.connect(uri);
+
+        // Read JSON file
+        String filePath = "src/main/resources/activeGames/demo1.json";
+        try {
+            String jsonData = new String(Files.readAllBytes(Paths.get(filePath)));
+            // Send JSON data
+            client.sendMessage(jsonData);
+        } catch (IOException | EncodeException e) {
+            e.printStackTrace();
+        }*/
         board.setStepMode(true);
         continuePrograms();
     }

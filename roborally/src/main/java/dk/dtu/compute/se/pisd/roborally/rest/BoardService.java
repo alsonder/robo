@@ -11,6 +11,9 @@ public class BoardService implements  IBoard {
     //creating an object of ArrayList
     ArrayList<Space> spaces = new ArrayList<Space>();
 
+
+
+    /*
     public BoardService() {
         //adding products to the List
         spaces.add(new Space(
@@ -19,8 +22,7 @@ public class BoardService implements  IBoard {
                 5, // x coordinate
                 4  // y coordinate
         ));
-
-    }
+    }*/
 
     @Override
     public List<Space> findAll() {
