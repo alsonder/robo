@@ -78,8 +78,13 @@
                <artifactId>json</artifactId>
                <version>20231013</version>
            </dependency>
+           <dependency>
+               <groupId>com.vaadin.external.google</groupId>
+               <artifactId>android-json</artifactId>
+               <version>20190722</version>
+           </dependency>
 
-    </dependencies>
+       </dependencies>
 
     <build>
         <!-- we use default maven directory structure as indicated below
