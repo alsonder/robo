@@ -29,6 +29,7 @@ import dk.dtu.compute.se.pisd.roborally.RoboRally;
 import dk.dtu.compute.se.pisd.roborally.fileaccess.LoadBoard;
 import dk.dtu.compute.se.pisd.roborally.model.Board;
 
+import dk.dtu.compute.se.pisd.roborally.model.Player;
 import javafx.application.Platform;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
@@ -80,10 +81,10 @@ public class AppController implements Observer {
 
         if(result.isPresent()){
             clientController.connectServer(result.get());
-            joinedServerChoices();
+            joinedServerChoices(result.get());
         }
     }
-    private void joinedServerChoices() {
+    private void joinedServerChoices(String ip) {
         // Custom dialog setup
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Server is up and running!");
@@ -93,9 +94,11 @@ public class AppController implements Observer {
         VBox vbox = new VBox(10);
         Label label = new Label("Select a game to join:");
 
+
+
         // List of games as example
         ListView<String> listView = new ListView<>();
-        listView.getItems().addAll("Game 1", "Game 2", "Game 3", "Game 4");
+        listView.getItems().addAll(ClientController.getListOfGames(ip));
 
         Button createGameButton = new Button("Create new game");
         createGameButton.setOnAction(e -> {
@@ -129,9 +132,53 @@ public class AppController implements Observer {
     private void createGame() {
         System.out.println("Creating a new game...");
         // Add logic to create a new game
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("State a game ID");
+        Optional<String> result = dialog.showAndWait();
+        if(result.isPresent()) {
+            ClientController.startNewGame(result.get());
+        }
     }
 
-    public void newGame() throws IOException, InterruptedException {
+    public void newGame() {
+        ChoiceDialog<Integer> dialog = new ChoiceDialog<>(PLAYER_NUMBER_OPTIONS.get(0), PLAYER_NUMBER_OPTIONS);
+        dialog.setTitle("Player number");
+        dialog.setHeaderText("Select number of players");
+        Optional<Integer> result = dialog.showAndWait();
+
+        if (result.isPresent()) {
+            if (gameController != null) {
+                // The UI should not allow this, but in case this happens anyway.
+                // give the user the option to save the game or abort this operation!
+                if (!stopGame()) {
+                    return;
+                }
+            }
+
+            // XXX the board should eventually be created programmatically or loaded from a file
+            //     here we just create an empty board with the required number of players.
+            Board board = LoadBoard.loadBoard("defaultboard");
+
+            gameController = new GameController(this, board);
+            int no = result.get();
+            board.setSpawnSpacesDefault(no);
+            for (int i = 0; i < no; i++) {
+                Player player = new Player(board, PLAYER_COLORS.get(i), "Player " + (i + 1));
+                board.addPlayer(player);
+                player.setSpawnSpace(board.getSpawnSpaces().get(i));
+                player.setSpace(player.getSpawnSpace());
+
+            }
+
+            // XXX: V2
+            // board.setCurrentPlayer(board.getPlayer(0));
+            gameController.startProgrammingPhase();
+
+            roboRally.createBoardView(gameController);
+        }
+    }
+
+    public void newGame1() throws IOException, InterruptedException {
         ChoiceDialog<Integer> dialog = new ChoiceDialog<>(PLAYER_NUMBER_OPTIONS.get(0), PLAYER_NUMBER_OPTIONS);
         dialog.setTitle("Player number");
         dialog.setHeaderText("Select number of players");
