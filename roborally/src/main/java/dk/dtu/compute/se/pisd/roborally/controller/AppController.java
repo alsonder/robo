@@ -99,6 +99,15 @@ public class AppController implements Observer {
         // List of games as example
         ListView<String> listView = new ListView<>();
         listView.getItems().addAll(ClientController.getListOfGames(ip));
+        listView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) { // Check for double-click
+                String selectedItem = listView.getSelectionModel().getSelectedItem();
+                if (selectedItem != null) {
+                    // Handle the item selection (e.g., join the game)
+                    joinGame(selectedItem);
+                }
+            }
+        });
 
         Button createGameButton = new Button("Create new game");
         createGameButton.setOnAction(e -> {
