@@ -5,8 +5,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-
 public class ClientController {
+
+
+
+
     final public AppController appController;
 
     public ClientController(AppController appController) {
