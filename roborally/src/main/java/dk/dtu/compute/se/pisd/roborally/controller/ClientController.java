@@ -8,8 +8,6 @@ import java.net.URL;
 public class ClientController {
 
 
-
-
     final public AppController appController;
 
     public ClientController(AppController appController) {
