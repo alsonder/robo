@@ -28,19 +28,24 @@ import dk.dtu.compute.se.pisd.roborally.RoboRally;
 
 import dk.dtu.compute.se.pisd.roborally.fileaccess.LoadBoard;
 import dk.dtu.compute.se.pisd.roborally.model.Board;
-import dk.dtu.compute.se.pisd.roborally.model.Player;
 
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * ...
@@ -78,19 +83,55 @@ public class AppController implements Observer {
             joinedServerChoices();
         }
     }
-    private void joinedServerChoices(){
-        String choice = null;
-        ChoiceDialog<String> dialog = new ChoiceDialog<>();
+    private void joinedServerChoices() {
+        // Custom dialog setup
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Server is up and running!");
+        dialog.setHeaderText("Join an active game:");
 
-        dialog.setHeaderText("Join or Create Lobby");
-        Optional<String> join = dialog.showAndWait();
-        Optional<String> create = dialog.showAndWait();
-        String track = "";
+        // Create the content area with games list and button
+        VBox vbox = new VBox(10);
+        Label label = new Label("Select a game to join:");
 
+        // List of games as example
+        ListView<String> listView = new ListView<>();
+        listView.getItems().addAll("Game 1", "Game 2", "Game 3", "Game 4");
 
+        Button createGameButton = new Button("Create new game");
+        createGameButton.setOnAction(e -> {
+            createGame();
+            dialog.close(); // Close dialog after action
+        });
+
+        vbox.getChildren().addAll(label, listView, createGameButton);
+        dialog.getDialogPane().setContent(vbox);
+
+        // Add button type
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
+
+        // Show dialog and handle results
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            String selectedGame = listView.getSelectionModel().getSelectedItem();
+            if (selectedGame != null) {
+                joinGame(selectedGame);
+            }
+        } else {
+            System.out.println("No selection made or dialog closed.");
+        }
     }
 
-    public void newGame() {
+    private void joinGame(String game) {
+        System.out.println("Joining game: " + game);
+        // Add logic to join the selected game
+    }
+
+    private void createGame() {
+        System.out.println("Creating a new game...");
+        // Add logic to create a new game
+    }
+
+    public void newGame() throws IOException, InterruptedException {
         ChoiceDialog<Integer> dialog = new ChoiceDialog<>(PLAYER_NUMBER_OPTIONS.get(0), PLAYER_NUMBER_OPTIONS);
         dialog.setTitle("Player number");
         dialog.setHeaderText("Select number of players");
@@ -105,26 +146,29 @@ public class AppController implements Observer {
                 }
             }
 
-            // XXX the board should eventually be created programmatically or loaded from a file
-            //     here we just create an empty board with the required number of players.
-            Board board = LoadBoard.loadBoard("defaultboard");
-
-            gameController = new GameController(this, board);
             int no = result.get();
-            board.setSpawnSpacesDefault(no);
-            for (int i = 0; i < no; i++) {
-                Player player = new Player(board, PLAYER_COLORS.get(i), "Player " + (i + 1));
-                board.addPlayer(player);
-                player.setSpawnSpace(board.getSpawnSpaces().get(i));
-                player.setSpace(player.getSpawnSpace());
+            List<String> playerColors = PLAYER_COLORS.subList(0, no);
+            List<String> playerNames = IntStream.range(0, no)
+                    .mapToObj(i -> "Player " + (i + 1))
+                    .collect(Collectors.toList());
 
-            }
+            // Create a HttpClient to send the POST request
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/game")) // Replace with your server's URL
+                    .POST(HttpRequest.BodyPublishers.ofString(
+                            String.format("{\"playerColors\": %s, \"playerNames\": %s}", playerColors, playerNames)))
+                    .header("Content-Type", "application/json")
+                    .build();
 
-            // XXX: V2
-            // board.setCurrentPlayer(board.getPlayer(0));
-            gameController.startProgrammingPhase();
+            // Send the POST request
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            roboRally.createBoardView(gameController);
+            // Parse the response to get the game ID
+            String gameId = new JSONObject(response.body()).getString("gameId");
+
+            // Load the game from the server
+            loadGame();
         }
     }
     private Optional<ButtonType> showAlert(String message) {

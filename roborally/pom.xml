@@ -6,30 +6,31 @@
 
     <groupId>dk.dtu.compute.se.pisd</groupId>
     <artifactId>roborally</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <description>
-        RoboRally demo with database access and loading
-        some game boards from a files for the course
-        Project in Software Development (PiSD) taught at
-        DTU Compute.
-    </description>
+       <version>1.0.0-SNAPSHOT</version>
+       <description>
+           RoboRally demo with database access and loading
+           some game boards from a files for the course
+           Project in Software Development (PiSD) taught at
+           DTU Compute.
+       </description>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>17</maven.compiler.release>
-        <javafx.version>17</javafx.version>
-        <javafx.maven.plugin.version>0.0.6</javafx.maven.plugin.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+       <properties>
+           <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+           <maven.compiler.release>17</maven.compiler.release>
+           <javafx.version>17</javafx.version>
+           <javafx.maven.plugin.version>0.0.6</javafx.maven.plugin.version>
+           <maven.compiler.source>17</maven.compiler.source>
+           <maven.compiler.target>17</maven.compiler.target>
+           <start-class>dk.dtu.compute.se.pisd.roborally.StartRoboRally</start-class>
 
-    </properties>
+       </properties>
 
-    <dependencies>
-        <!-- Note that the dependencies here include some more dependencies
-             than are necessary right now; dependencies that might need to
-             be included later in the course of the project are added
-             already now, just to avoid missing these later. This applies
-             for example to mysql, gson, guava, ...  -->
+       <dependencies>
+           <!-- Note that the dependencies here include some more dependencies
+                than are necessary right now; dependencies that might need to
+                be included later in the course of the project are added
+                already now, just to avoid missing these later. This applies
+                for example to mysql, gson, guava, ...  -->
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
@@ -57,12 +58,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.4.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
@@ -73,17 +68,16 @@
             <version>${javafx.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.7.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>7.9.0</version>
             <scope>compile</scope>
         </dependency>
+           <dependency>
+               <groupId>org.json</groupId>
+               <artifactId>json</artifactId>
+               <version>20231013</version>
+           </dependency>
 
     </dependencies>
 
