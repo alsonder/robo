@@ -57,9 +57,37 @@ public class AppController implements Observer {
 
     private GameController gameController;
 
+    private ClientController clientController;
+
     private String gameName = "unnamed";
     public AppController(@NotNull RoboRally roboRally) {
         this.roboRally = roboRally;
+    }
+
+
+
+
+    public void joinServer(){
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Insert Ip of server");
+        Optional<String> result = dialog.showAndWait();
+        ClientController clientController = new ClientController(this);
+
+        if(result.isPresent()){
+            clientController.connectServer(result.get());
+            joinedServerChoices();
+        }
+    }
+    private void joinedServerChoices(){
+        String choice = null;
+        ChoiceDialog<String> dialog = new ChoiceDialog<>();
+
+        dialog.setHeaderText("Join or Create Lobby");
+        Optional<String> join = dialog.showAndWait();
+        Optional<String> create = dialog.showAndWait();
+        String track = "";
+
+
     }
 
     public void newGame() {
