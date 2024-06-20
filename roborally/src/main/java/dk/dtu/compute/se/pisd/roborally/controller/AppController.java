@@ -28,19 +28,25 @@ import dk.dtu.compute.se.pisd.roborally.RoboRally;
 
 import dk.dtu.compute.se.pisd.roborally.fileaccess.LoadBoard;
 import dk.dtu.compute.se.pisd.roborally.model.Board;
+
 import dk.dtu.compute.se.pisd.roborally.model.Player;
-
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
+//import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * ...
@@ -75,20 +81,75 @@ public class AppController implements Observer {
 
         if(result.isPresent()){
             clientController.connectServer(result.get());
-            joinedServerChoices();
+            joinedServerChoices(result.get());
         }
     }
-    private void joinedServerChoices(){
-        String choice = null;
-        ChoiceDialog<String> dialog = new ChoiceDialog<>();
+    private void joinedServerChoices(String ip) {
+        // Custom dialog setup
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Server is up and running!");
+        dialog.setHeaderText("Join an active game:");
 
-        dialog.setHeaderText("Join or Create Lobby");
-        Optional<String> join = dialog.showAndWait();
-        Optional<String> create = dialog.showAndWait();
-        String track = "";
+        // Create the content area with games list and button
+        VBox vbox = new VBox(10);
+        Label label = new Label("Select a game to join:");
 
 
+
+        // List of games as example
+        ListView<String> listView = new ListView<>();
+        listView.getItems().addAll(ClientController.getListOfGames(ip));
+        listView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) { // Check for double-click
+                String selectedItem = listView.getSelectionModel().getSelectedItem();
+                if (selectedItem != null) {
+                    // Handle the item selection (e.g., join the game)
+                    joinGame(selectedItem);
+                }
+            }
+        });
+
+        Button createGameButton = new Button("Create new game");
+        createGameButton.setOnAction(e -> {
+            createGame();
+            dialog.close(); // Close dialog after action
+        });
+
+        vbox.getChildren().addAll(label, listView, createGameButton);
+        dialog.getDialogPane().setContent(vbox);
+
+        // Add button type
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
+
+        // Show dialog and handle results
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            String selectedGame = listView.getSelectionModel().getSelectedItem();
+            if (selectedGame != null) {
+                joinGame(selectedGame);
+            }
+        } else {
+            System.out.println("No selection made or dialog closed.");
+        }
     }
+
+    private void joinGame(String game) {
+        System.out.println("Joining game: " + game);
+        // Add logic to join the selected game
+    }
+
+    private void createGame() {
+        System.out.println("Creating a new game...");
+        // Add logic to create a new game
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("State a game ID");
+        Optional<String> result = dialog.showAndWait();
+        if(result.isPresent()) {
+            ClientController.startNewGame(result.get());
+        }
+    }
+
+
 
     public void newGame() {
         ChoiceDialog<Integer> dialog = new ChoiceDialog<>(PLAYER_NUMBER_OPTIONS.get(0), PLAYER_NUMBER_OPTIONS);
@@ -127,6 +188,47 @@ public class AppController implements Observer {
             roboRally.createBoardView(gameController);
         }
     }
+
+    /*public void newGame1() throws IOException, InterruptedException {
+        ChoiceDialog<Integer> dialog = new ChoiceDialog<>(PLAYER_NUMBER_OPTIONS.get(0), PLAYER_NUMBER_OPTIONS);
+        dialog.setTitle("Player number");
+        dialog.setHeaderText("Select number of players");
+        Optional<Integer> result = dialog.showAndWait();
+
+        if (result.isPresent()) {
+            if (gameController != null) {
+                // The UI should not allow this, but in case this happens anyway.
+                // give the user the option to save the game or abort this operation!
+                if (!stopGame()) {
+                    return;
+                }
+            }
+
+            int no = result.get();
+            List<String> playerColors = PLAYER_COLORS.subList(0, no);
+            List<String> playerNames = IntStream.range(0, no)
+                    .mapToObj(i -> "Player " + (i + 1))
+                    .collect(Collectors.toList());
+
+            // Create a HttpClient to send the POST request
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/game")) // Replace with your server's URL
+                    .POST(HttpRequest.BodyPublishers.ofString(
+                            String.format("{\"playerColors\": %s, \"playerNames\": %s}", playerColors, playerNames)))
+                    .header("Content-Type", "application/json")
+                    .build();
+
+            // Send the POST request
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            // Parse the response to get the game ID
+            //String gameId = new JSONObject(response.body()).getString("gameId");
+
+            // Load the game from the server
+            loadGame();
+        }
+    }*/
     private Optional<ButtonType> showAlert(String message) {
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setHeaderText(message);

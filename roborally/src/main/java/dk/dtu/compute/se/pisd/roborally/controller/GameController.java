@@ -272,6 +272,9 @@ public class GameController {
     }
 
     public void executeStep() {
+        // UFFE s
+        new Thread(new ApiTask()).start();
+        //UFFE e
         board.setStepMode(true);
         continuePrograms();
     }
