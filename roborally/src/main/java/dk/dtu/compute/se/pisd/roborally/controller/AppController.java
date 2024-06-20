@@ -35,7 +35,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
+//import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URI;
@@ -187,7 +187,7 @@ public class AppController implements Observer {
         }
     }
 
-    public void newGame1() throws IOException, InterruptedException {
+    /*public void newGame1() throws IOException, InterruptedException {
         ChoiceDialog<Integer> dialog = new ChoiceDialog<>(PLAYER_NUMBER_OPTIONS.get(0), PLAYER_NUMBER_OPTIONS);
         dialog.setTitle("Player number");
         dialog.setHeaderText("Select number of players");
@@ -221,12 +221,12 @@ public class AppController implements Observer {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             // Parse the response to get the game ID
-            String gameId = new JSONObject(response.body()).getString("gameId");
+            //String gameId = new JSONObject(response.body()).getString("gameId");
 
             // Load the game from the server
             loadGame();
         }
-    }
+    }*/
     private Optional<ButtonType> showAlert(String message) {
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setHeaderText(message);
