@@ -93,13 +93,13 @@
     </dependencies>
 
     <build>
-        <!-- we use default maven directory structure as indicated below
+        <!-- we use default maven directory structure as indicated below -->
         <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
         <resources>
             <resource>
                 <directory>${basedir}/src/resources</directory>
             </resource>
-        </resources> -->
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
