@@ -91,7 +91,11 @@ public class SpaceView extends StackPane implements ViewObserver {
         }
 
         // Path to the JSON file
-        String filePath = "roborally/src/main/resources/boards/defaultboard.json";
+        String filePath = "src/main/resources/boards/defaultboard.json";
+
+        if (!new File(filePath).exists())
+            filePath = "roborally/" + filePath;
+
         /**
          * Reads a JSON file from the specified file path, parses it, and processes it for painting the tiles.
          *

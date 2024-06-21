@@ -1,4 +1,4 @@
-package dk.dtu.compute.se.pisd.roborally.test;
+package test;
 
 import dk.dtu.compute.se.pisd.roborally.model.Board;
 import dk.dtu.compute.se.pisd.roborally.model.Player;

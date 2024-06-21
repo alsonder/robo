@@ -46,7 +46,7 @@ public class LoadBoard {
 
     private static final String DEFAULTBOARD = "defaultboard";
     private static final String JSON_EXT = "json";
-    private static final String PATH_TO_RES ="roborally" + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator;
+    private static final String PATH_TO_RES = "src" + File.separator + "main" + File.separator + "resources" + File.separator;
     private static final String BOARDSFOLDER = PATH_TO_RES + "boards";
     private static final String ACTIVEGAMES = PATH_TO_RES + "activeGames";
 
@@ -54,7 +54,7 @@ public class LoadBoard {
      * Loads a board configuration from a JSON file. If the specified board name is not found, it defaults to loading
      * the defaultboard. This method creates the board from the templates shown under the model folder.
      *
-     * @param boardName The name of the file you wish to load which is kept undre resources/boards/
+     * @param boardName The name of the file you wish to load which is kept under resources/boards/
      * @return An initialized {@link Board} object, or null if an error occurs during file loading.
      */
     public static Board loadBoard(String boardName) {
@@ -69,6 +69,10 @@ public class LoadBoard {
         if (!file.exists()) {
             System.out.println("File not found - printing default");
             file = new File(BOARDSFOLDER + File.separator + DEFAULTBOARD + "." + JSON_EXT);
+            if (!file.exists()){
+                System.out.println("The path is still tweaked out");
+                file = new File("roborally" + File.separator + BOARDSFOLDER + File.separator + DEFAULTBOARD + "." + JSON_EXT);
+            }
         }
 
         GsonBuilder simpleBuilder = new GsonBuilder().registerTypeAdapter(FieldAction.class, new Adapter<FieldAction>());
