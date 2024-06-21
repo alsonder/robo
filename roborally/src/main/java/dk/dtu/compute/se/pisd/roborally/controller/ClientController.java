@@ -1,7 +1,6 @@
 package dk.dtu.compute.se.pisd.roborally.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
@@ -13,7 +12,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -183,42 +181,61 @@ public class ClientController {
         }
     }
 
-    public static List<String> getListOfPlayers(String game){
-            HttpRequest request = HttpRequest.newBuilder()
-                    .GET()
-                    .uri(URI.create("http://" + "10.209.140.39" + ":8080/games/" + game + "/players"))
-                    .build();
+    public static List<String> getListOfPlayers(String game) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(URI.create("http://" + "10.209.140.39" + ":8080/games/" + game + "/players"))
+                .build();
 
-            CompletableFuture<HttpResponse<String>> response =
-                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        CompletableFuture<HttpResponse<String>> response =
+                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
 
-            String result = null;
-            try {
-                result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                throw new RuntimeException(e);
-            }
+        String result = null;
+        try {
+            result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
 
-            // Parse the JSON response to extract player names
-            ObjectMapper objectMapper = new ObjectMapper();
-            List<String> playerNames;
-            try {
-                JsonNode root = objectMapper.readTree(result);
-                playerNames = objectMapper.convertValue(root.get("players"), new TypeReference<List<JsonNode>>() {})
-                        .stream()
-                        .map(node -> node.get("name").asText())
-                        .collect(Collectors.toList());
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to parse players.json", e);
-            }
+        // Split the response by comma and newline to extract player names
+        List<String> playerNames;
+        try {
+            playerNames = Arrays.stream(result.split(",\n"))
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse players.txt", e);
+        }
 
-            return playerNames;
+        return playerNames;
     }
 
-/*
-    public void addPlayer(){
-        HttpRequest request = HttpRequest.newBuilder().POST()
-    }
 
- */
+
+    public static void addPlayer(String game) {
+        // Get the current list of players
+        List<String> players = getListOfPlayers(game);
+
+        // Determine the next player name
+        int nextPlayerNumber = players.size();
+        String newPlayerName = "Player" + nextPlayerNumber;
+
+        // Create the POST request to add the new player
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString("playerName=" + newPlayerName))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .uri(URI.create("http://" + "10.209.140.39" + ":8080/games/" + game + "/players"))
+                .build();
+
+        CompletableFuture<HttpResponse<String>> response =
+                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+
+        String result = null;
+        try {
+            result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 }
