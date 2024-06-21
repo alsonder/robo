@@ -46,10 +46,9 @@ public class LoadBoard {
 
     private static final String DEFAULTBOARD = "defaultboard";
     private static final String JSON_EXT = "json";
-    private static final String PATH_TO_RES = "src" + File.separator + "main" + File.separator + "resources" + File.separator;
+    private static final String PATH_TO_RES = "roborally" + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator;
     private static final String BOARDSFOLDER = PATH_TO_RES + "boards";
     private static final String ACTIVEGAMES = PATH_TO_RES + "activeGames";
-
     /**
      * Loads a board configuration from a JSON file. If the specified board name is not found, it defaults to loading
      * the defaultboard. This method creates the board from the templates shown under the model folder.

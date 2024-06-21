@@ -47,7 +47,7 @@ public class ApiTask implements Runnable {
                 //if(!response.isEmpty()) System.out.println("Got Mily Response");
 
                 // GET BOARD FROM SERVER *GET*
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/boards/test.json"))) {
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("roborally/src/main/resources/boards/test.json"))) {
                     writer.write(response.toString());
                     //System.out.println("JSON saved to " + "src/main/resources/boards/test.json");
                 } catch (IOException e) {
@@ -56,7 +56,7 @@ public class ApiTask implements Runnable {
                 }
                 // UFFE s3
                 ObjectMapper objectMapper = new ObjectMapper();
-                GameController.GameData gameData = objectMapper.readValue(new File("src/main/resources/boards/test.json"), GameController.GameData.class);
+                GameController.GameData gameData = objectMapper.readValue(new File("roborally/src/main/resources/boards/test.json"), GameController.GameData.class);
 
                 // Update players
                 for (Player jsonPlayer : gameData.getPlayers()) {

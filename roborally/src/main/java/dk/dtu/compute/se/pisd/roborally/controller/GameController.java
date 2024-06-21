@@ -288,7 +288,7 @@ public class GameController {
 
     public void executeStep() throws IOException {
         // UFFE s1
-        String jsonData = new String(Files.readAllBytes(Paths.get("src/main/resources/boards/test.json")));
+        String jsonData = new String(Files.readAllBytes(Paths.get("roborally/src/main/resources/boards/test.json")));
         ClientController clientController = new ClientController(appController);
         clientController.putBoardJson(ip, jsonData);
         // UFFE s2

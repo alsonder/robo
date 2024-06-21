@@ -128,7 +128,7 @@ public class ClientController {
                 System.out.println(response3);
 
                 // GET BOARD FROM SERVER *GET*
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/boards/test.json"))) {
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("roborally/src/main/resources/boards/test.json"))) {
                     writer.write(response.toString());
                     System.out.println("JSON saved to " + "src/main/resources/boards/test.json");
                 } catch (IOException e) {
@@ -137,7 +137,7 @@ public class ClientController {
                 }
 
                 // SEND BOARD TO SERVER *PUT*
-                String jsonData = new String(Files.readAllBytes(Paths.get("src/main/resources/boards/test.json")));
+                String jsonData = new String(Files.readAllBytes(Paths.get("roborally/src/main/resources/boards/test.json")));
                 ClientController clientController = new ClientController(appController);
                 clientController.putBoardJson(ip, jsonData);
                 //2.2
