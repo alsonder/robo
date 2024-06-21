@@ -263,7 +263,7 @@ public class GameController {
             Player player = board.getPlayer(i);
             for (int j = 0; j < Player.NO_REGISTERS; j++) {
                 CommandCardField field = player.getProgramField(j);
-                field.setVisible(false);
+                field.setVisible(true);
             }
         }
     }

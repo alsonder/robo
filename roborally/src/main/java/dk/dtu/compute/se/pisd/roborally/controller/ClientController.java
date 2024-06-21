@@ -2,6 +2,7 @@ package dk.dtu.compute.se.pisd.roborally.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dk.dtu.compute.se.pisd.roborally.model.PlayerInfo;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -197,6 +198,11 @@ public class ClientController {
             throw new RuntimeException(e);
         }
 
+        // Check if the result is empty
+        if (result.trim().isEmpty()) {
+            return List.of(); // Return an empty list if the result is empty
+        }
+
         // Split the response by comma and newline to extract player names
         List<String> playerNames;
         try {
@@ -210,15 +216,14 @@ public class ClientController {
         return playerNames;
     }
 
-
-
-    public static void addPlayer(String game) {
+    public static String addPlayer(String game) {
         // Get the current list of players
         List<String> players = getListOfPlayers(game);
 
         // Determine the next player name
-        int nextPlayerNumber = players.size();
-        String newPlayerName = "Player" + nextPlayerNumber;
+        int nextPlayerNumber = players.size() + 1;
+        String newPlayerName = "Player " + nextPlayerNumber;
+        PlayerInfo.PlayerNumber = newPlayerName;
 
         // Create the POST request to add the new player
         HttpRequest request = HttpRequest.newBuilder()
@@ -237,5 +242,6 @@ public class ClientController {
             throw new RuntimeException(e);
         }
 
+        return newPlayerName;
     }
 }

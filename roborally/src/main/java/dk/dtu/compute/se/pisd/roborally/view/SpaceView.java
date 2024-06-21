@@ -148,10 +148,10 @@ public class SpaceView extends StackPane implements ViewObserver {
                                         if (space.x+1 == x && space.y == y  )
                                             paint(6,2);
                                     }
-                                    System.out.println("set wall on " + wall.getAsString() + " facing me");
+                                 //   System.out.println("set wall on " + wall.getAsString() + " facing me");
                                 }
                             if (className.equals("ConveyorBelt")){
-                                System.out.println("set on "+x+","+y+" : "+ className+" "+instanceObject.getAsJsonPrimitive("heading").getAsString());
+                               // System.out.println("set on "+x+","+y+" : "+ className+" "+instanceObject.getAsJsonPrimitive("heading").getAsString());
                                 if (space.x == x && space.y == y){
                                     if (Objects.equals(instanceObject.getAsJsonPrimitive("heading").getAsString(), "SOUTH"))
                                         paint(1,6);
@@ -181,7 +181,7 @@ public class SpaceView extends StackPane implements ViewObserver {
                             // down right left up
 
                             // Print a separator for clarity
-                            System.out.println("-----------------------------------");
+                           // System.out.println("-----------------------------------");
                         }
                     }
                 }
