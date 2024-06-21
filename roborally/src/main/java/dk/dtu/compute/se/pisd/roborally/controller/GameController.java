@@ -21,11 +21,20 @@
  */
 package dk.dtu.compute.se.pisd.roborally.controller;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import dk.dtu.compute.se.pisd.roborally.fileaccess.model.ApiTask;
 import dk.dtu.compute.se.pisd.roborally.model.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
+
+import static dk.dtu.compute.se.pisd.roborally.fileaccess.model.IP.ip;
 
 /**
  * ...
@@ -37,11 +46,12 @@ public class GameController {
 
     final public AppController appController;
 
-    final public Board board;
+    public static volatile Board board;
+
 
     public GameController(AppController appController, Board board) {
         this.appController = appController;
-        this.board = board;
+        GameController.board = board;
     }
 
 
@@ -259,6 +269,11 @@ public class GameController {
     }
 
     public void finishProgrammingPhase() {
+        // UFFE s
+        /*for (int i = 0; i < board.getPlayers().size(); i++) {
+            Thread GetData = new Thread(new ApiTask());
+        }*/
+        // UFFE e
         makeProgramFieldsInvisible();
         makeProgramFieldsVisible(0);
         board.setPhase(Phase.ACTIVATION);
@@ -271,9 +286,32 @@ public class GameController {
         continuePrograms();
     }
 
-    public void executeStep() {
-        // UFFE s
-        new Thread(new ApiTask()).start();
+    public void executeStep() throws IOException {
+        // UFFE s1
+        String jsonData = new String(Files.readAllBytes(Paths.get("src/main/resources/boards/test.json")));
+        ClientController clientController = new ClientController(appController);
+        clientController.putBoardJson(ip, jsonData);
+        // UFFE s2
+        Thread GetData = null;
+        if (board.getStep()==0&&board.getCurrentPlayer()==board.getPlayer(0))
+            for (int i = 0; i < board.getPlayers().size(); i++) {
+                GetData = new Thread(new ApiTask());
+                System.out.println("started" + board.getPlayer(i).getName());
+            }
+        System.out.println(board.getCurrentPlayer().getName());        if (board.getStep()==4&&board.getCurrentPlayer()==board.getPlayer(board.getPlayers().size()-1))
+            for (int j = 0; j < board.getPlayers().size(); j++) {
+                if (GetData != null) {
+                    GetData.interrupt();
+                }
+                System.out.println("Stopped "+board.getPlayer(j).getName());
+            }
+            /*
+        for (int i = 0; i < board.getPlayers().size(); i++) {
+            board.getPlayer(i).setSpace(read json file and find the space that the player should be on);
+            board.getPlayer(i).setHeading(read json file for player and set heading);
+            board.getPlayer(i).setCheckPoint(read json and get checkpoint correct);
+        }*/
+
         //UFFE e
         board.setStepMode(true);
         continuePrograms();
@@ -447,7 +485,7 @@ public class GameController {
     }
 
 
-    class ImpossibleMoveException extends Exception {
+    static class ImpossibleMoveException extends Exception {
 
         private Player player;
         private Space space;
@@ -461,4 +499,79 @@ public class GameController {
         }
     }
 
+    //UFFE s3
+    public class GameData {
+        private List<Player> players;
+
+        @JsonProperty("current")
+        private Player currentPlayer;
+
+        private Phase phase;
+        private int step;
+        private boolean stepMode;
+        private List<Space> spawnSpaces;
+        private String map;
+
+        // Getters and setters...
+
+        public List<Player> getPlayers() {
+            return players;
+        }
+
+        public void setPlayers(List<Player> players) {
+            this.players = players;
+        }
+
+        public Player getCurrentPlayer() {
+            return currentPlayer;
+        }
+
+        public void setCurrentPlayer(Player currentPlayer) {
+            this.currentPlayer = currentPlayer;
+        }
+
+        public Phase getPhase() {
+            return phase;
+        }
+
+        public void setPhase(Phase phase) {
+            this.phase = phase;
+        }
+
+        public int getStep() {
+            return step;
+        }
+
+        public void setStep(int step) {
+            this.step = step;
+        }
+
+        public boolean isStepMode() {
+            return stepMode;
+        }
+
+        public void setStepMode(boolean stepMode) {
+            this.stepMode = stepMode;
+        }
+
+        public List<Space> getSpawnSpaces() {
+            return spawnSpaces;
+        }
+
+        public void setSpawnSpaces(List<Space> spawnSpaces) {
+            this.spawnSpaces = spawnSpaces;
+        }
+
+        public String getMap() {
+            return map;
+        }
+
+        public void setMap(String map) {
+            this.map = map;
+        }
+    }
+    //UFFE se3
+
+
 }
+
