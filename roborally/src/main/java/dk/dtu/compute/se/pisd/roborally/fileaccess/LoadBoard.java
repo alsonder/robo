@@ -46,7 +46,7 @@ public class LoadBoard {
 
     private static final String DEFAULTBOARD = "defaultboard";
     private static final String JSON_EXT = "json";
-    private static final String PATH_TO_RES = "src" + File.separator + "main" + File.separator + "resources" + File.separator;
+    private static final String PATH_TO_RES ="roborally" + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator;
     private static final String BOARDSFOLDER = PATH_TO_RES + "boards";
     private static final String ACTIVEGAMES = PATH_TO_RES + "activeGames";
 
@@ -68,8 +68,7 @@ public class LoadBoard {
 
         if (!file.exists()) {
             System.out.println("File not found - printing default");
-            //file = new File(BOARDSFOLDER + File.separator + DEFAULTBOARD + "." + JSON_EXT);
-            file = new File("C:\\Users\\hanso\\Documents\\GitHub\\robo\\roborally\\src\\main\\resources\\boards\\defaultboard.json");
+            file = new File(BOARDSFOLDER + File.separator + DEFAULTBOARD + "." + JSON_EXT);
         }
 
         GsonBuilder simpleBuilder = new GsonBuilder().registerTypeAdapter(FieldAction.class, new Adapter<FieldAction>());
