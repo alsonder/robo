@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import static dk.dtu.compute.se.pisd.roborally.fileaccess.model.IP.ip;
+
 
 public class ClientController {
     final public AppController appController;
@@ -64,7 +66,7 @@ public class ClientController {
     public static void startNewGame(String id){
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString("id"))
-                .uri(URI.create("http://"+"10.209.140.39"+":8080/games/game1/board"))
+                .uri(URI.create("http://"+ip+":8080/games/game1/board"))
                 .build();
 
     }
@@ -90,54 +92,25 @@ public class ClientController {
                 BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String inputLine;
                 StringBuilder response = new StringBuilder();
-                //2.1
-                BufferedReader in2 = new BufferedReader(new InputStreamReader(connection2.getInputStream()));
-                String inputLine2;
-                StringBuilder response2 = new StringBuilder();
-                //2.2
-                //3.1
-                BufferedReader in3 = new BufferedReader(new InputStreamReader(connection3.getInputStream()));
-                String inputLine3;
-                StringBuilder response3 = new StringBuilder();
-                //3.2
-
-
 
                 while ((inputLine = in.readLine()) != null) {
                     response.append(inputLine);
                 }
                 in.close();
-                //2.1
-                while ((inputLine2 = in2.readLine()) != null) {
-                    response2.append(inputLine2);
-                }
-                in2.close();
-                //2.2
-                //3.1
-                while ((inputLine3 = in3.readLine()) != null) {
-                    response3.append(inputLine3);
-                }
-                in3.close();
-                //3.2
 
                 System.out.println(response.toString());
-                //2.1
-
-                System.out.println("\r\n----------------------------------------------------------------------------------------\r\n");
-                System.out.println(response2.toString());
-                System.out.println(response3);
 
                 // GET BOARD FROM SERVER *GET*
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/boards/test.json"))) {
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("roborally/src/main/resources/boards/test.json"))) {
                     writer.write(response.toString());
-                    System.out.println("JSON saved to " + "src/main/resources/boards/test.json");
+                    System.out.println("JSON saved to " + "roborally/src/main/resources/boards/test.json");
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.err.println("Failed to write JSON file: " + e.getMessage());
                 }
 
                 // SEND BOARD TO SERVER *PUT*
-                String jsonData = new String(Files.readAllBytes(Paths.get("src/main/resources/boards/test.json")));
+                String jsonData = new String(Files.readAllBytes(Paths.get("roborally/src/main/resources/boards/test.json")));
                 ClientController clientController = new ClientController(appController);
                 clientController.putBoardJson(ip, jsonData);
                 //2.2
@@ -186,7 +159,7 @@ public class ClientController {
     public static List<String> getListOfPlayers(String game){
             HttpRequest request = HttpRequest.newBuilder()
                     .GET()
-                    .uri(URI.create("http://" + "10.209.140.39" + ":8080/games/" + game + "/players"))
+                    .uri(URI.create("http://" + ip+ ":8080/games/" + game + "/players"))
                     .build();
 
             CompletableFuture<HttpResponse<String>> response =
