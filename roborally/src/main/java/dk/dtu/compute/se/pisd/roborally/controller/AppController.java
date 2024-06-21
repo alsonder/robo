@@ -31,9 +31,12 @@ import dk.dtu.compute.se.pisd.roborally.model.Board;
 
 import dk.dtu.compute.se.pisd.roborally.model.Player;
 import javafx.application.Platform;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 //import org.json.JSONObject;
 
@@ -94,8 +97,6 @@ public class AppController implements Observer {
         VBox vbox = new VBox(10);
         Label label = new Label("Select a game to join:");
 
-
-
         // List of games as example
         ListView<String> listView = new ListView<>();
         listView.getItems().addAll(ClientController.getListOfGames(ip));
@@ -134,9 +135,39 @@ public class AppController implements Observer {
     }
 
     private void joinGame(String game) {
-        System.out.println("Joining game: " + game);
-        // Add logic to join the selected game
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setHeaderText("Players in " + game);
+
+        // Create the content area with games list and button
+        VBox vbox = new VBox(6);
+
+
+        ListView<String> listView = new ListView<>();
+        listView.getItems().addAll(ClientController.getListOfPlayers(game));
+
+        Button joinLobbyButton = new Button("Join Lobby");
+        joinLobbyButton.setOnAction(e -> {gameController.notImplemented();});
+
+        Button refreshLobbyButton = new Button("Refresh Lobby");
+        refreshLobbyButton.setOnAction(e -> {clientController.getListOfPlayers(game);});
+
+        Button startGameButton = new Button("Start Game");
+        startGameButton.setOnAction(e -> {gameController.notImplemented();
+            dialog.close();
+        });
+
+        vbox.getChildren().addAll(listView, startGameButton,refreshLobbyButton,joinLobbyButton);
+        dialog.getDialogPane().setContent(vbox);
+
+        // Add button type
+        ButtonType closeButtonType = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(closeButtonType);
+
+        // Show the dialog and wait for user interaction
+        dialog.showAndWait();
     }
+
+
 
     private void createGame() {
         System.out.println("Creating a new game...");

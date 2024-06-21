@@ -1,5 +1,9 @@
 package dk.dtu.compute.se.pisd.roborally.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.http.HttpClient;
@@ -16,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 
 public class ClientController {
@@ -25,10 +30,7 @@ public class ClientController {
         this.appController = appController;
     }
 
-    private static final HttpClient httpClient = HttpClient.newBuilder()
-            .version(HttpClient.Version.HTTP_2)
-            .connectTimeout(Duration.ofSeconds(10))
-            .build();
+    private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     public static List<String> getListOfGames(String ip)  {
 
@@ -47,8 +49,14 @@ public class ClientController {
             throw new RuntimeException(e);
         }
 
-        // Split the result by commas and return as a list
-        List<String> gamesList = Arrays.asList(result.split(","));
+        // Parse the JSON response into a list
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<String> gamesList;
+        try {
+            gamesList = objectMapper.readValue(result, new TypeReference<List<String>>() {});
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse response", e);
+        }
 
         return gamesList;
     }
@@ -56,7 +64,7 @@ public class ClientController {
     public static void startNewGame(String id){
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString("id"))
-                .uri(URI.create("http://"+"10.209.103.216"+":8080/games/game1/board"))
+                .uri(URI.create("http://"+"10.209.140.39"+":8080/games/game1/board"))
                 .build();
 
     }
@@ -174,4 +182,43 @@ public class ClientController {
             e.printStackTrace();
         }
     }
+
+    public static List<String> getListOfPlayers(String game){
+            HttpRequest request = HttpRequest.newBuilder()
+                    .GET()
+                    .uri(URI.create("http://" + "10.209.140.39" + ":8080/games/" + game + "/players"))
+                    .build();
+
+            CompletableFuture<HttpResponse<String>> response =
+                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+
+            String result = null;
+            try {
+                result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                throw new RuntimeException(e);
+            }
+
+            // Parse the JSON response to extract player names
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<String> playerNames;
+            try {
+                JsonNode root = objectMapper.readTree(result);
+                playerNames = objectMapper.convertValue(root.get("players"), new TypeReference<List<JsonNode>>() {})
+                        .stream()
+                        .map(node -> node.get("name").asText())
+                        .collect(Collectors.toList());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to parse players.json", e);
+            }
+
+            return playerNames;
+    }
+
+/*
+    public void addPlayer(){
+        HttpRequest request = HttpRequest.newBuilder().POST()
+    }
+
+ */
 }
