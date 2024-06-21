@@ -32,6 +32,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+
 /**
  * ...
  *
@@ -102,7 +104,13 @@ public class PlayerView extends Tab implements ViewObserver {
         executeButton.setOnAction( e-> gameController.executePrograms());
 
         stepButton = new Button("Execute Current Register");
-        stepButton.setOnAction( e-> gameController.executeStep());
+        stepButton.setOnAction( e-> {
+            try {
+                gameController.executeStep();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         buttonPanel = new VBox(finishButton, executeButton, stepButton);
         buttonPanel.setAlignment(Pos.CENTER_LEFT);
