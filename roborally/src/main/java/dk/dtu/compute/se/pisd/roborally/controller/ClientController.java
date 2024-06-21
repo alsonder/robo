@@ -1,6 +1,7 @@
 package dk.dtu.compute.se.pisd.roborally.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dtu.compute.se.pisd.roborally.model.PlayerInfo;
 
@@ -158,7 +159,7 @@ public class ClientController {
     public static List<String> getListOfPlayers(String game){
             HttpRequest request = HttpRequest.newBuilder()
                     .GET()
-                    .uri(URI.create("http://" + ip+ ":8080/games/" + game + "/players"))
+                    .uri(URI.create("http://" + ip+ ":8080/games/" + game + "/playersa"))
                     .build();
 
             CompletableFuture<HttpResponse<String>> response =
@@ -186,6 +187,40 @@ public class ClientController {
 
         return playerNames;
     }
+    /*
+    public static List<String> getListOfPlayers(String game) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(URI.create("http://" + ip + ":8080/games/" + game + "/players"))
+                .build();
+
+        CompletableFuture<HttpResponse<String>> response =
+                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+
+        String result = null;
+        try {
+            result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Check if the result is empty
+        if (result.trim().isEmpty()) {
+            return List.of(); // Return an empty list if the result is empty
+        }
+
+        // Split the response by comma and newline to extract player names
+        List<String> playerNames;
+        try {
+            playerNames = Arrays.stream(result.split(",\n"))
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse players.txt", e);
+        }
+
+        return playerNames;
+    }*/
 
     public static String addPlayer(String game) {
         // Get the current list of players
@@ -200,7 +235,7 @@ public class ClientController {
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString("playerName=" + newPlayerName))
                 .header("Content-Type", "application/x-www-form-urlencoded")
-                .uri(URI.create("http://" + "10.209.140.39" + ":8080/games/" + game + "/players"))
+                .uri(URI.create("http://" + ip + ":8080/games/" + game + "/players"))
                 .build();
 
         CompletableFuture<HttpResponse<String>> response =

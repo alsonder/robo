@@ -34,7 +34,6 @@ import java.util.List;
  *
  */
 public class SpaceTemplate {
-
     public List<Heading> walls;
     public List<FieldAction> actions;
     public int x;

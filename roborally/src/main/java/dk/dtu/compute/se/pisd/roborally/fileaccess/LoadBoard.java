@@ -64,11 +64,12 @@ public class LoadBoard {
             System.out.println("printing default");
         }
 
-        File file = new File(BOARDSFOLDER + File.separator + boardName + "." + JSON_EXT);
+        File file = new File( BOARDSFOLDER + File.separator + boardName + "." + JSON_EXT);
 
         if (!file.exists()) {
             System.out.println("File not found - printing default");
-            file = new File(BOARDSFOLDER + File.separator + DEFAULTBOARD + "." + JSON_EXT);
+            //file = new File(BOARDSFOLDER + File.separator + DEFAULTBOARD + "." + JSON_EXT);
+            file = new File("C:\\Users\\hanso\\Documents\\GitHub\\robo\\roborally\\src\\main\\resources\\boards\\defaultboard.json");
         }
 
         GsonBuilder simpleBuilder = new GsonBuilder().registerTypeAdapter(FieldAction.class, new Adapter<FieldAction>());
