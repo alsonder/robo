@@ -30,6 +30,7 @@ import dk.dtu.compute.se.pisd.roborally.fileaccess.LoadBoard;
 import dk.dtu.compute.se.pisd.roborally.model.Board;
 
 import dk.dtu.compute.se.pisd.roborally.model.Player;
+import dk.dtu.compute.se.pisd.roborally.model.PlayerInfo;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -106,6 +107,7 @@ public class AppController implements Observer {
                 if (selectedItem != null) {
                     // Handle the item selection (e.g., join the game)
                     joinGame(selectedItem);
+                    dialog.close();
                 }
             }
         });
@@ -148,12 +150,20 @@ public class AppController implements Observer {
         Button joinLobbyButton = new Button("Join Lobby");
         joinLobbyButton.setOnAction(e -> {clientController.addPlayer(game);});
 
+
         Button refreshLobbyButton = new Button("Refresh Lobby");
-        refreshLobbyButton.setOnAction(e -> {clientController.getListOfPlayers(game);});
+        refreshLobbyButton.setOnAction(e -> {clientController.getListOfPlayers(game);
+            listView.getItems().clear();
+            listView.getItems().addAll(ClientController.getListOfPlayers(game));
+        });
 
         Button startGameButton = new Button("Start Game");
-        startGameButton.setOnAction(e -> {gameController.notImplemented();
+        startGameButton.setOnAction(e -> {
+
+            PlayerInfo.NumberOfPlayers = clientController.getListOfPlayers(game).size();
+            startGame();
             dialog.close();
+
         });
 
         vbox.getChildren().addAll(listView, startGameButton,refreshLobbyButton,joinLobbyButton);
@@ -165,6 +175,7 @@ public class AppController implements Observer {
 
         // Show the dialog and wait for user interaction
         dialog.showAndWait();
+        dialog.close();
     }
 
 
@@ -180,6 +191,45 @@ public class AppController implements Observer {
         }
     }
 
+    public void startGame(){
+        /*
+        ChoiceDialog<Integer> dialog = new ChoiceDialog<>(PLAYER_NUMBER_OPTIONS.get(0), PLAYER_NUMBER_OPTIONS);
+        dialog.setTitle("Player number");
+        dialog.setHeaderText("Select number of players");
+        Optional<Integer> result = dialog.showAndWait();
+        */
+
+        if (PlayerInfo.NumberOfPlayers >= 2) {
+            if (gameController != null) {
+                // The UI should not allow this, but in case this happens anyway.
+                // give the user the option to save the game or abort this operation!
+                if (!stopGame()) {
+                    return;
+                }
+            }
+
+            // XXX the board should eventually be created programmatically or loaded from a file
+            //     here we just create an empty board with the required number of players.
+            Board board = LoadBoard.loadBoard("defaultboard");
+
+            gameController = new GameController(this, board);
+            int no = PlayerInfo.NumberOfPlayers;
+            board.setSpawnSpacesDefault(no);
+            for (int i = 0; i < no; i++) {
+                Player player = new Player(board, PLAYER_COLORS.get(i), "Player " + (i + 1));
+                board.addPlayer(player);
+                player.setSpawnSpace(board.getSpawnSpaces().get(i));
+                player.setSpace(player.getSpawnSpace());
+
+            }
+
+            // XXX: V2
+            // board.setCurrentPlayer(board.getPlayer(0));
+            gameController.startProgrammingPhase();
+
+            roboRally.createBoardView(gameController);
+        }
+    }
 
 
     public void newGame() {
