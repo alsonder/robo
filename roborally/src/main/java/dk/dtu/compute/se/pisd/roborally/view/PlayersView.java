@@ -21,6 +21,7 @@
  */
 package dk.dtu.compute.se.pisd.roborally.view;
 
+import com.google.gson.annotations.Expose;
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
 import dk.dtu.compute.se.pisd.roborally.controller.GameController;
 import dk.dtu.compute.se.pisd.roborally.model.Board;
@@ -40,7 +41,7 @@ public class PlayersView extends TabPane implements ViewObserver {
 
     private Board board;
 
-    private PlayerView[] playerViews;
+    public static PlayerView[] playerViews;
 
     public PlayersView(GameController gameController) {
         board = gameController.board;
@@ -57,11 +58,12 @@ public class PlayersView extends TabPane implements ViewObserver {
             if(Objects.equals(board.getPlayer(i).getName(), PlayerInfo.PlayerNumber)){
 
                 playerViews[i].setDisable(false);
+
             }
             else {
                 playerViews[i].setDisable(true);
-                System.out.println("hek " + PlayerInfo.PlayerNumber);
-                System.out.println("ikke info " + board.getPlayer(i).getName());
+                //System.out.println("hek " + PlayerInfo.PlayerNumber);
+                //System.out.println("ikke info " + board.getPlayer(i).getName());
             }
         }
         board.attach(this);

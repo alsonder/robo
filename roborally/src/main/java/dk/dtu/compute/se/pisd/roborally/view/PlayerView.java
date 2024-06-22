@@ -101,7 +101,13 @@ public class PlayerView extends Tab implements ViewObserver {
         finishButton.setOnAction( e -> gameController.finishProgrammingPhase());
 
         executeButton = new Button("Execute Program");
-        executeButton.setOnAction( e-> gameController.executePrograms());
+        executeButton.setOnAction( e-> {
+            try {
+                gameController.executePrograms();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         stepButton = new Button("Execute Current Register");
         stepButton.setOnAction( e-> {

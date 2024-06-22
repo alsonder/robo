@@ -184,9 +184,12 @@ public class LoadBoard {
             player.setHeading(p.getHeading());
             board.addPlayer(player);
 
-            if(player.getName().equals(current.getName()))
+            // UFFE s10
+            /*if(player.getName().equals(current.getName()))
+                board.setCurrentPlayer(player);*/
+            if(player.getName().equals(PlayerInfo.PlayerNumber))
                 board.setCurrentPlayer(player);
-
+            //UFFEe10
         }
         board.setPhase(phase);
         board.setStepMode(stepmode);

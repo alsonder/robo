@@ -3,6 +3,9 @@ package dk.dtu.compute.se.pisd.roborally.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dk.dtu.compute.se.pisd.roborally.fileaccess.LoadBoard;
+import dk.dtu.compute.se.pisd.roborally.fileaccess.model.ApiTask;
+import dk.dtu.compute.se.pisd.roborally.model.Board;
 import dk.dtu.compute.se.pisd.roborally.model.PlayerInfo;
 
 import java.io.*;
@@ -26,10 +29,22 @@ import static dk.dtu.compute.se.pisd.roborally.fileaccess.model.IP.ip;
 
 
 public class ClientController {
-    final public AppController appController;
+    static public AppController appController = null;
+    private static ApiTask apiTask;
+
+
+    private static void startApiTask(GameController gameController) {
+        if (apiTask != null) {
+            apiTask.stopApiTask();
+        }
+
+        apiTask = new ApiTask(gameController);
+        Thread apiThread = new Thread(apiTask);
+        apiThread.start();
+    }
 
     public ClientController(AppController appController) {
-        this.appController = appController;
+        ClientController.appController = appController;
     }
 
     private static final HttpClient httpClient = HttpClient.newHttpClient();
@@ -71,21 +86,11 @@ public class ClientController {
 
     }
 
-    public void connectServer(String ip) {
-        try {
-            URL url = new URL("http://" + ip + ":8080/games/game1/board");
+    public void connectServer(String ip, String game) {
+        /*try {
+            URL url = new URL(PlayerInfo.URLPath+game+"/data");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-            //2.1
-            URL url2 = new URL("http://" + ip + ":8080/games/game1/players");
-            HttpURLConnection connection2 = (HttpURLConnection) url2.openConnection();
-            connection2.setRequestMethod("GET");
-            //2.2
-            //3.1
-            URL url3 = new URL("http://" + ip + ":8080/games");
-            HttpURLConnection connection3 = (HttpURLConnection) url3.openConnection();
-            connection3.setRequestMethod("GET");
-            //3.2
 
             int responseCode = connection.getResponseCode();
             if (responseCode == 200) {
@@ -101,16 +106,16 @@ public class ClientController {
                 System.out.println(response.toString());
 
                 // GET BOARD FROM SERVER *GET*
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter("roborally/src/main/resources/boards/test.json"))) {
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("roborally/src/main/resources/activeGames/data.json"))) {
                     writer.write(response.toString());
-                    System.out.println("JSON saved to " + "roborally/src/main/resources/boards/test.json");
+                    System.out.println("JSON saved to " + "roborally/src/main/resources/activeGames/data.json");
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.err.println("Failed to write JSON file: " + e.getMessage());
                 }
 
                 // SEND BOARD TO SERVER *PUT*
-                String jsonData = new String(Files.readAllBytes(Paths.get("roborally/src/main/resources/boards/test.json")));
+                String jsonData = new String(Files.readAllBytes(Paths.get("roborally/src/main/resources/activeGames/data.json")));
                 ClientController clientController = new ClientController(appController);
                 clientController.putBoardJson(ip, jsonData);
                 //2.2
@@ -119,12 +124,45 @@ public class ClientController {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     public void putBoardJson(String ip, String jsonData) {
         try {
-            URL url = new URL("http://" + ip + ":8080/games/game1/board");
+            URL url = new URL(PlayerInfo.URLPath+"/board");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PUT");
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Accept", "application/json");
+
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = jsonData.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                System.out.println("PUT request successful.");
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+                System.out.println(response.toString());
+            } else {
+                System.out.println("PUT request failed. Response Code: " + responseCode);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public void putDataJson(String ip, String jsonData) {
+        try {
+            URL url = new URL(PlayerInfo.URLPath+"/data");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("PUT");
             connection.setDoOutput(true);
@@ -156,10 +194,11 @@ public class ClientController {
         }
     }
 
+/*
     public static List<String> getListOfPlayers(String game){
             HttpRequest request = HttpRequest.newBuilder()
                     .GET()
-                    .uri(URI.create("http://" + ip+ ":8080/games/" + game + "/playersa"))
+                    .uri(URI.create("http://" + ip+ ":8080/games/" + game + "/playersv"))
                     .build();
 
             CompletableFuture<HttpResponse<String>> response =
@@ -186,8 +225,8 @@ public class ClientController {
             }
 
         return playerNames;
-    }
-    /*
+    }*/
+
     public static List<String> getListOfPlayers(String game) {
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
@@ -220,7 +259,9 @@ public class ClientController {
         }
 
         return playerNames;
-    }*/
+    }
+
+
 
     public static String addPlayer(String game) {
         // Get the current list of players
@@ -229,7 +270,19 @@ public class ClientController {
         // Determine the next player name
         int nextPlayerNumber = players.size() + 1;
         String newPlayerName = "Player " + nextPlayerNumber;
+        PlayerInfo.URLPath = "http://"+ip+":8080/games/"+game;
         PlayerInfo.PlayerNumber = newPlayerName;
+        // Initialize the board and game controller
+        Board board = LoadBoard.loadBoard("defaultboard"); // Load the board here
+        GameController gameController = new GameController(appController, board);
+
+        // Initialize the board and game controller
+// Start the ApiTask thread
+        startApiTask(gameController);
+
+
+// Start the ApiTask threadstartApiTask(gameController);
+
 
         // Create the POST request to add the new player
         HttpRequest request = HttpRequest.newBuilder()

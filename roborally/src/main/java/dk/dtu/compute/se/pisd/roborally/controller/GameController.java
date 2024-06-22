@@ -22,6 +22,11 @@
 package dk.dtu.compute.se.pisd.roborally.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sun.tools.javac.Main;
 import dk.dtu.compute.se.pisd.roborally.fileaccess.model.ApiTask;
 import dk.dtu.compute.se.pisd.roborally.model.*;
 import javafx.scene.control.Alert;
@@ -30,11 +35,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static dk.dtu.compute.se.pisd.roborally.fileaccess.model.IP.ip;
+import static dk.dtu.compute.se.pisd.roborally.view.PlayersView.playerViews;
 
 /**
  * ...
@@ -43,17 +52,45 @@ import static dk.dtu.compute.se.pisd.roborally.fileaccess.model.IP.ip;
  *
  */
 public class GameController {
-
     final public AppController appController;
-
     public static volatile Board board;
-
-
     public GameController(AppController appController, Board board) {
         this.appController = appController;
         GameController.board = board;
     }
 
+    /*public void updatePlayersFromGameData(GameData gameData) {
+        if (board == null) {
+            throw new IllegalStateException("Board is not initialized.");
+        }
+
+        for (Player jsonPlayer : gameData.getPlayers()) {
+            for (Player boardPlayer : board.getPlayers()) {
+                if (boardPlayer.getName().equals(jsonPlayer.getName())) {
+                    boardPlayer.setSpace(jsonPlayer.getSpace());
+                    boardPlayer.setHeading(jsonPlayer.getHeading());
+                    boardPlayer.setCheckPoint(jsonPlayer.getCheckPoint());
+                }
+            }
+        }
+    }*/
+    public void updatePlayersFromGameData(GameData gameData) {
+        for (Player jsonPlayer : gameData.getPlayers()) {
+            for (Player boardPlayer : board.getPlayers()) {
+                if (boardPlayer.getName().equals(jsonPlayer.getName())) {
+                    boardPlayer.setSpace(jsonPlayer.getSpace());
+                    boardPlayer.setHeading(jsonPlayer.getHeading());
+                    boardPlayer.setCheckPoint(jsonPlayer.getCheckPoint());
+                    boardPlayer.setTurn(jsonPlayer.isTurn());
+                    boardPlayer.setSpawnSpace(jsonPlayer.getSpawnSpace());
+                }
+            }
+        }
+        board.setCurrentPlayer(gameData.getCurrentPlayer());
+        board.setPhase(gameData.getPhase());
+        board.setStep(gameData.getStep());
+        board.setStepMode(gameData.isStepMode());
+    }
 
 
 
@@ -270,9 +307,9 @@ public class GameController {
 
     public void finishProgrammingPhase() {
         // UFFE s
-        /*for (int i = 0; i < board.getPlayers().size(); i++) {
-            Thread GetData = new Thread(new ApiTask());
-        }*/
+        //for (int i = 0; i < board.getPlayers().size(); i++) {
+
+        //}
         // UFFE e
         makeProgramFieldsInvisible();
         makeProgramFieldsVisible(0);
@@ -281,49 +318,157 @@ public class GameController {
         board.setStep(0);
     }
 
-    public void executePrograms() {
+    public void executePrograms() throws IOException {
         board.setStepMode(false);
         continuePrograms();
     }
 
     public void executeStep() throws IOException {
-        // UFFE s1
-        String jsonData = new String(Files.readAllBytes(Paths.get("src/main/resources/boards/test.json")));
+        // Load the existing JSON data
+        /*ClassLoader classLoader = Main.class.getClassLoader();
+        InputStream inputStream = classLoader.getResourceAsStream("activeGames/data.json");
+        if (inputStream == null) {
+            throw new IOException("File not found: activeGames/data.json");
+        }
+        Path tempFile = Files.createTempFile("data", ".json");
+        Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+
+        String jsonData = new String(Files.readAllBytes(tempFile));
+        System.out.println("Read JSON data: " + jsonData);
+
+        // Send the current state to the server
         ClientController clientController = new ClientController(appController);
         clientController.putBoardJson(ip, jsonData);
-        // UFFE s2
-        Thread GetData = null;
-        if (board.getStep()==0&&board.getCurrentPlayer()==board.getPlayer(0))
-            for (int i = 0; i < board.getPlayers().size(); i++) {
-                GetData = new Thread(new ApiTask());
-                System.out.println("started" + board.getPlayer(i).getName());
-            }
-        System.out.println(board.getCurrentPlayer().getName());        if (board.getStep()==4&&board.getCurrentPlayer()==board.getPlayer(board.getPlayers().size()-1))
-            for (int j = 0; j < board.getPlayers().size(); j++) {
-                if (GetData != null) {
-                    GetData.interrupt();
-                }
-                System.out.println("Stopped "+board.getPlayer(j).getName());
-            }
-            /*
-        for (int i = 0; i < board.getPlayers().size(); i++) {
-            board.getPlayer(i).setSpace(read json file and find the space that the player should be on);
-            board.getPlayer(i).setHeading(read json file for player and set heading);
-            board.getPlayer(i).setCheckPoint(read json and get checkpoint correct);
-        }*/
 
-        //UFFE e
+        // Update the current player information in the JSON file
+        try {
+            Path filePath = Paths.get("src/main/resources/activeGames/data.json");
+            ObjectMapper objectMapper = new ObjectMapper();
+            GameController.GameData gameData = objectMapper.readValue(filePath.toFile(), GameController.GameData.class);
+
+            // Determine the next player number
+            Player currentPlayer = board.getCurrentPlayer();
+            System.out.println("CP1:"+board.getCurrentPlayer());
+            int nextPlayerNumber = (board.getPlayerNumber(currentPlayer) + 1) % board.getPlayersNumber();
+            Player nextPlayer = board.getPlayer(nextPlayerNumber);
+
+            // Update the current player in game data
+            gameData.setCurrentPlayer(nextPlayer);
+
+            // Save the updated game data back to the JSON file
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(filePath.toFile(), gameData);
+
+            System.out.println("Updated JSON data: " + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(gameData));
+
+            // Update the current player in the board
+            board.setCurrentPlayer(nextPlayer);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Failed to update JSON file: " + e.getMessage());
+        }*/
+        ObjectMapper mapper = new ObjectMapper();
+
+        // Define the path to the JSON file within the resources directory
+        Path resourceDirectory = Paths.get("roborally","src", "main", "resources","activeGames", "data.json");
+        File jsonFile = resourceDirectory.toFile();
+        System.out.println("Path to JSON file: " + jsonFile.getAbsolutePath());
+        //C:\Users\hanso\Desktop\websocket-prototype\websocket-prototype\src\main\resources\mike.json
+
+        try (FileInputStream fis = new FileInputStream(jsonFile)) {
+            JsonNode rootNode = mapper.readTree(fis);
+
+            // Print out the entire JSON for inspection
+            System.out.println("Entire JSON content:");
+            System.out.println(rootNode.toPrettyString());
+
+            // Check specifically for 'players'
+            if (rootNode.has("players")) {
+                System.out.println("'players' node exists.");
+                JsonNode playersNode = rootNode.get("players");
+
+                if (playersNode.isArray()) {
+                    System.out.println("'players' node is an array.");
+                    ArrayNode players = (ArrayNode) playersNode;
+                    ObjectNode player1 = null;
+
+                    for (JsonNode player : players) {
+                        if (player.isObject() && "Player 1".equals(player.get("name").asText())) {
+                            player1 = (ObjectNode) player;
+                            System.out.println("Player 1 found and accessed.");
+                            break;
+                        }
+                    }
+
+                    // MOD current to pl1
+                    if (player1 != null) {
+                        ObjectNode currentPlayer = (ObjectNode) rootNode.path("current");
+                        currentPlayer.setAll(player1);
+                        System.out.println("Current player's values set to Player 1.");
+                        System.out.println("Entire JSON content after:");
+                        System.out.println(rootNode.toPrettyString());
+                        try (FileOutputStream fos = new FileOutputStream(jsonFile)) {
+                            mapper.writerWithDefaultPrettyPrinter().writeValue(fos, rootNode);
+                            System.out.println("JSON file has been updated successfully.");
+                        }
+                        //
+                        ClientController clientController = new ClientController(appController);
+                        clientController.putDataJson(ip, rootNode.toPrettyString());
+                        //
+                    } else {
+                        System.err.println("Player 1 not found in the array.");
+                    }
+                } else {
+                    System.err.println("'players' node is not an array. It is: " + playersNode.getNodeType());
+                }
+            } else {
+                System.err.println("'players' node does not exist.");
+            }
+        } catch (IOException e) {
+            System.err.println("Error processing JSON file: " + e.getMessage());
+        }
+
+        // Continue the program execution
         board.setStepMode(true);
         continuePrograms();
     }
 
-    private void continuePrograms() {
+
+
+
+    private void continuePrograms() throws IOException {
         do {
             executeNextStep();
+            //UFFE s4
+            /*ClassLoader classLoader = Main.class.getClassLoader();
+            InputStream inputStream = classLoader.getResourceAsStream("activeGames/data.json");
+            if (inputStream == null) {throw new IOException("File not found: activeGames/data.json");}
+            Path tempFile = Files.createTempFile("data", ".json");
+            Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+
+            String jsonData = new String(Files.readAllBytes(tempFile));
+            System.out.println("Read JSON data: " + jsonData);
+
+            // UFFE s1
+            //String jsonData = new String(Files.readAllBytes(Paths.get("src/main/resources/activeGames/data.json")));
+            ClientController clientController = new ClientController(appController);
+            clientController.putBoardJson(ip, jsonData);*/
+            // UFFE s9
+
+            for (int i = 0; i < board.getPlayers().size(); i++) {
+                if(Objects.equals(board.getPlayer(i).getName(), PlayerInfo.PlayerNumber)){
+                    playerViews[i].setDisable(true);
+                    if (board.getPlayer(i+1) != null){
+                        playerViews[i+1].setDisable(false);
+                    } else playerViews[0].setDisable(false);
+                }
+            }
+
+            // UFFE e9
         } while (board.getPhase() == Phase.ACTIVATION && !board.isStepMode());
     }
 
-    private void executeNextStep() {
+    private void executeNextStep() throws IOException {
         Player currentPlayer = board.getCurrentPlayer();
         if (board.getPhase() == Phase.ACTIVATION && currentPlayer != null) {
             int step = board.getStep();
@@ -331,31 +476,60 @@ public class GameController {
                 CommandCard card = currentPlayer.getProgramField(step).getCard();
                 if (card != null) {
                     Command command = card.command;
-                    if(command.isInteractive()){
+                    if (command.isInteractive()) {
                         board.setPhase(Phase.PLAYER_INTERACTION);
                         return;
                     }
                     executeCommand(currentPlayer, command, step);  // Correctly include the step as the register index
                 }
-                int nextPlayerNumber = board.getPlayerNumber(currentPlayer) + 1;
-                if (nextPlayerNumber < board.getPlayersNumber()) {
-                    board.setCurrentPlayer(board.getPlayer(nextPlayerNumber));
-                } else {
-                    step++;
-                    if (step < Player.NO_REGISTERS) {
-                        makeProgramFieldsVisible(step);
-                        board.setStep(step);
-                        board.setCurrentPlayer(board.getPlayer(0));
-                    } else {
-                        for(Player player:board.getPlayers()){
-                            Space space = player.getSpace();
-                            for(FieldAction action: space.getActions()){
-                                action.doAction(this, space);
-                            }
+                int nextPlayerNumber = (board.getPlayerNumber(currentPlayer) + 1) % board.getPlayersNumber();
+
+                // Update the JSON file with the new turn values
+                try {
+                    Path filePath = Paths.get("src/main/resources/activeGames/data.json");
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    GameController.GameData gameData = objectMapper.readValue(filePath.toFile(), GameController.GameData.class);
+
+                    // Set the turn of the current player to false
+                    for (Player player : gameData.getPlayers()) {
+                        if (player.getName().equals(currentPlayer.getName())) {
+                            player.setTurn(false);
                         }
-                        gameWon();
-                        startProgrammingPhase();
                     }
+
+                    // Set the turn of the next player to true
+                    Player nextPlayer = board.getPlayer(nextPlayerNumber);
+                    for (Player player : gameData.getPlayers()) {
+                        if (player.getName().equals(nextPlayer.getName())) {
+                            player.setTurn(true);
+                        }
+                    }
+
+                    // Update the current player in game data
+                    gameData.setCurrentPlayer(nextPlayer);
+
+                    // Save the updated game data back to the JSON file
+                    objectMapper.writerWithDefaultPrettyPrinter().writeValue(filePath.toFile(), gameData);
+
+                    // Update the current player in the board
+                    board.setCurrentPlayer(nextPlayer);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.err.println("Failed to update JSON file: " + e.getMessage());
+                }
+
+                if (step + 1 < Player.NO_REGISTERS) {
+                    board.setStep(step + 1);
+                    board.setCurrentPlayer(board.getPlayer(0)); // Keep the same player
+                } else {
+                    for (Player player : board.getPlayers()) {
+                        Space space = player.getSpace();
+                        for (FieldAction action : space.getActions()) {
+                            action.doAction(this, space);
+                        }
+                    }
+                    gameWon();
+                    startProgrammingPhase();
                 }
             } else {
                 // this should not happen
@@ -366,6 +540,9 @@ public class GameController {
             assert false : "Invalid game phase or current player is null";
         }
     }
+
+
+
 
     private void executeCommand(@NotNull Player player, Command command, int registerIndex) {
         if (command == Command.AGAIN) {
@@ -500,7 +677,7 @@ public class GameController {
     }
 
     //UFFE s3
-    public class GameData {
+    public static class GameData {
         private List<Player> players;
 
         @JsonProperty("current")
@@ -521,10 +698,12 @@ public class GameController {
         public void setPlayers(List<Player> players) {
             this.players = players;
         }
+        @JsonProperty("current")
 
         public Player getCurrentPlayer() {
             return currentPlayer;
         }
+        @JsonProperty("current")
 
         public void setCurrentPlayer(Player currentPlayer) {
             this.currentPlayer = currentPlayer;

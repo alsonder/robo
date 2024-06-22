@@ -21,6 +21,9 @@
  */
 package dk.dtu.compute.se.pisd.roborally.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.Expose;
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
 import org.jetbrains.annotations.NotNull;
@@ -38,12 +41,26 @@ public class Player extends Subject {
     final public static int NO_REGISTERS = 5;
     final public static int NO_CARDS = 8;
 
+    @JsonProperty("turn")
+    @Expose
+    private boolean turn;
+
+    public boolean isTurn() {
+        return turn;
+    }
+
+    public void setTurn(boolean turn) {
+        this.turn = turn;
+    }
+
+    @JsonBackReference("board-players")
     final public Board board;
     @Expose
     private String name;
     @Expose
     private String color;
     @Expose
+    @JsonBackReference
     private Space space;
     @Expose
     private Heading heading = SOUTH;
@@ -58,7 +75,12 @@ public class Player extends Subject {
     @Expose
     private int checkPoint = 0;
 
-    public Player(@NotNull Board board, String color, @NotNull String name) {
+    // Default constructor for Jackson
+    @JsonCreator
+    public Player(
+            @JsonProperty("board") Board board,
+            @JsonProperty("color") String color,
+            @JsonProperty("name") String name) {
         this.board = board;
         this.name = name;
         this.color = color;

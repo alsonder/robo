@@ -23,34 +23,22 @@ package dk.dtu.compute.se.pisd.roborally.controller;
 
 import dk.dtu.compute.se.pisd.designpatterns.observer.Observer;
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
-
 import dk.dtu.compute.se.pisd.roborally.RoboRally;
-
 import dk.dtu.compute.se.pisd.roborally.fileaccess.LoadBoard;
 import dk.dtu.compute.se.pisd.roborally.model.Board;
-
 import dk.dtu.compute.se.pisd.roborally.model.Player;
 import dk.dtu.compute.se.pisd.roborally.model.PlayerInfo;
 import javafx.application.Platform;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
-//import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
+import static dk.dtu.compute.se.pisd.roborally.fileaccess.model.IP.ip;
 
 /**
  * ...
@@ -84,8 +72,9 @@ public class AppController implements Observer {
         ClientController clientController = new ClientController(this);
 
         if(result.isPresent()){
-            clientController.connectServer(result.get());
+            clientController.connectServer(result.get(),result.get());
             joinedServerChoices(result.get());
+
         }
     }
     private void joinedServerChoices(String ip) {
@@ -188,6 +177,7 @@ public class AppController implements Observer {
         Optional<String> result = dialog.showAndWait();
         if(result.isPresent()) {
             ClientController.startNewGame(result.get());
+            dialog.close();
         }
     }
 
@@ -198,7 +188,6 @@ public class AppController implements Observer {
         dialog.setHeaderText("Select number of players");
         Optional<Integer> result = dialog.showAndWait();
         */
-
         if (PlayerInfo.NumberOfPlayers >= 2) {
             if (gameController != null) {
                 // The UI should not allow this, but in case this happens anyway.
@@ -207,11 +196,9 @@ public class AppController implements Observer {
                     return;
                 }
             }
-
             // XXX the board should eventually be created programmatically or loaded from a file
             //     here we just create an empty board with the required number of players.
             Board board = LoadBoard.loadBoard("defaultboard");
-
             gameController = new GameController(this, board);
             int no = PlayerInfo.NumberOfPlayers;
             board.setSpawnSpacesDefault(no);
@@ -220,13 +207,10 @@ public class AppController implements Observer {
                 board.addPlayer(player);
                 player.setSpawnSpace(board.getSpawnSpaces().get(i));
                 player.setSpace(player.getSpawnSpace());
-
             }
-
             // XXX: V2
             // board.setCurrentPlayer(board.getPlayer(0));
             gameController.startProgrammingPhase();
-
             roboRally.createBoardView(gameController);
         }
     }

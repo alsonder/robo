@@ -1,26 +1,7 @@
-/*
- *  This file is part of the initial project provided for the
- *  course "Project in Software Development (02362)" held at
- *  DTU Compute at the Technical University of Denmark.
- *
- *  Copyright (C) 2019, 2020: Ekkart Kindler, ekki@dtu.dk
- *
- *  This software is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; version 2 of the License.
- *
- *  This project is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this project; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- */
 package dk.dtu.compute.se.pisd.roborally.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.Expose;
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
 import dk.dtu.compute.se.pisd.roborally.controller.FieldAction;
@@ -28,12 +9,6 @@ import dk.dtu.compute.se.pisd.roborally.controller.FieldAction;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * ...
- *
- * @author Ekkart Kindler, ekki@dtu.dk
- *
- */
 public class Space extends Subject {
 
     private Player player;
@@ -41,13 +16,27 @@ public class Space extends Subject {
     private List<Heading> walls = new ArrayList<>();
     private List<FieldAction> actions = new ArrayList<>();
 
-    public final Board board;
     @Expose
-    public final int x;
+    public Board board;
     @Expose
-    public final int y;
+    public int x;
+    @Expose
+    public int y;
 
-    public Space(Board board, int x, int y) {
+    // Default constructor for Jackson
+    public Space() {
+        this.board = null; // or some default value
+        this.x = 0;        // or some default value
+        this.y = 0;        // or some default value
+        player = null;
+    }
+
+    // Constructor with parameters
+    @JsonCreator
+    public Space(
+            @JsonProperty("board") Board board,
+            @JsonProperty("x") int x,
+            @JsonProperty("y") int y) {
         this.board = board;
         this.x = x;
         this.y = y;
@@ -78,11 +67,15 @@ public class Space extends Subject {
         return walls;
     }
 
+    public void setWalls(List<Heading> walls) {
+        this.walls = walls;
+    }
+
     public List<FieldAction> getActions() {
         return actions;
     }
 
-    public void setActions(List<FieldAction> newActions){
+    public void setActions(List<FieldAction> newActions) {
         actions = newActions;
     }
 
@@ -93,4 +86,28 @@ public class Space extends Subject {
         notifyChange();
     }
 
+    public Board getBoard() {
+        return board;
+    }
+
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
 }
+
