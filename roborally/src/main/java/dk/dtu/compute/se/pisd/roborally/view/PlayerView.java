@@ -21,8 +21,11 @@
  */
 package dk.dtu.compute.se.pisd.roborally.view;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
 import dk.dtu.compute.se.pisd.roborally.controller.GameController;
+import dk.dtu.compute.se.pisd.roborally.fileaccess.model.ApiTask;
 import dk.dtu.compute.se.pisd.roborally.model.*;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -32,7 +35,19 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
+
+import static dk.dtu.compute.se.pisd.roborally.controller.GameController.board;
 
 /**
  * ...
@@ -55,6 +70,10 @@ public class PlayerView extends Tab implements ViewObserver {
     private CardFieldView[] cardViews;
 
     private VBox buttonPanel;
+
+    //
+    private  Button updateButton;
+    //
 
     private Button finishButton;
     private Button executeButton;
@@ -96,6 +115,156 @@ public class PlayerView extends Tab implements ViewObserver {
         // XXX  the following buttons should actually not be on the tabs of the individual
         //      players, but on the PlayersView (view for all players). This should be
         //      refactored.
+        updateButton = new Button("Update");
+        updateButton.setOnAction( e -> {System.out.println("Calling API...");
+
+            HttpURLConnection connection = null;
+            try {
+                //
+                //
+                //
+                HttpClient client = HttpClient.newHttpClient();
+                URL url = new URL(PlayerInfo.URLPath + "/data");
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(url.toString()))
+                        .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                        .GET()
+                        .build();
+
+                try {
+                    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                    if (response.statusCode() == 200) {
+                        System.out.println("Response received successfully.");
+                        try {
+                            Path projectRootDir = Paths.get(System.getProperty("user.dir"));
+                            Path customDir = projectRootDir.resolve("roborally/src/main/resources/activeGames");
+                            Files.createDirectories(customDir); // Ensure the directory exists
+                            Path filePath = customDir.resolve("data");
+
+                            Files.writeString(filePath, response.body());
+                            System.out.println("JSON saved to " + filePath);
+                            System.out.println("saved:"+response.body());
+                        } catch (IOException f) {
+                            System.err.println("Failed to save data to file: " + f.getMessage());
+                        }
+                    }
+
+                 else {
+                        System.out.println("Failed to get a successful response: Status code = " + response.statusCode());
+                    }
+                } catch (IOException | InterruptedException f) {
+                    System.err.println("Error during HTTP call: " + f.getMessage());
+                }
+                //
+                //
+                //
+
+                //URL url = new URL(PlayerInfo.URLPath + "/data.json");
+                //URL url = new URL(PlayerInfo.URLPath + "/data.json?nocache=" + System.currentTimeMillis());
+                System.out.println("getting from "+url);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                // U17
+                connection.setRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate");
+                //U17
+
+                int responseCode = connection.getResponseCode();
+                if (responseCode == 200) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    String inputLine;
+                    StringBuilder response = new StringBuilder();
+
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+
+                    // Save JSON response to file
+                    Path projectRootDir = Paths.get(System.getProperty("user.dir"));
+                    Path customDir = projectRootDir.resolve("roborally/src/main/resources/activeGames");
+                    //Files.createDirectories(customDir); // Ensure the directory exists
+                    Path filePath = customDir.resolve("data.json");
+
+                    // U15
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath.toFile()))) {
+                        writer.write(response.toString());
+                        //System.out.println("JSON saved to " + filePath.toString());
+                        //System.out.println(response.toString());
+                    } catch (Exception f) {
+                        throw new RuntimeException();
+                    }
+                    // U15
+
+                    // Read and process JSON data
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    GameController.GameData gameData = objectMapper.readValue(filePath.toFile(), GameController.GameData.class);
+                    System.out.println("Game data read successfully");
+                    //System.out.println(gameData);
+
+                    // Update players and player views
+                    //uffes13
+                    File jsonFile = Paths.get("roborally", "src", "main", "resources", "activeGames", "data.json").toFile().getAbsoluteFile();
+
+                    // Create an ObjectMapper instance
+                    ObjectMapper mapper = new ObjectMapper();
+
+                    try {
+                        // Load the JSON file
+                        JsonNode rootNode = mapper.readTree(jsonFile);
+
+                        // Access the current player
+                        JsonNode currentPlayer = rootNode.get("current");
+
+                        if (currentPlayer != null) {
+                            // Extract the name of the current player
+                            JsonNode nameNode = currentPlayer.get("name");
+                            if (nameNode != null) {
+                                String currentPlayerName = nameNode.asText();
+                                // Output the name of the current player
+                                System.out.println("Current Player's Name: " + currentPlayerName);
+                                for (int i = 0; i < board.getPlayers().size(); i++) {
+                                    if (Objects.equals(board.getPlayer(i).getName(), currentPlayerName)) { //board.getCurrentPlayer()){
+                                        if (i == board.getPlayers().size() - 1) {
+                                            board.setCurrentPlayer(board.getPlayer(0));
+                                            PlayerInfo.PlayerNumber = board.getPlayer(0).getName();
+                                            gameData.setCurrentPlayer(board.getPlayer(0));
+                                        } else {
+                                            board.setCurrentPlayer(board.getPlayer(i + 1));
+                                            PlayerInfo.PlayerNumber = board.getPlayer(i+1).getName();
+                                            gameData.setCurrentPlayer(board.getPlayer(i + 1));
+                                        }
+                                    }
+                                }
+                            } else {
+                                System.out.println("Name field is missing");
+                            }
+                        } else {
+                            System.out.println("Current player data is missing");
+                        }
+
+                    } catch (IOException f) {
+                        System.err.println("Failed to read or parse the JSON file: " + f.getMessage());
+                    } catch (Exception f) {
+                        System.err.println("An error occurred: " + f.getMessage());
+                    }
+
+                    //
+
+                    //
+                    gameController.updatePlayersFromGameData(gameData);
+                    updatePlayerViews(gameData);
+
+                }
+
+            } catch (Exception f) {
+                System.err.println("Failed to call API: " + f.getMessage());
+                f.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect(); // Ensures the connection is closed
+                }
+            }}); // get from server
 
         finishButton = new Button("Finish Programming");
         finishButton.setOnAction( e -> gameController.finishProgrammingPhase());
@@ -118,7 +287,7 @@ public class PlayerView extends Tab implements ViewObserver {
             }
         });
 
-        buttonPanel = new VBox(finishButton, executeButton, stepButton);
+        buttonPanel = new VBox(updateButton, finishButton, executeButton, stepButton);
         buttonPanel.setAlignment(Pos.CENTER_LEFT);
         buttonPanel.setSpacing(3.0);
         // programPane.add(buttonPanel, Player.NO_REGISTERS, 0); done in update now
@@ -150,6 +319,9 @@ public class PlayerView extends Tab implements ViewObserver {
             player.board.attach(this);
             update(player.board);
         }
+    }
+
+    private void updatePlayerViews(GameController.GameData gameData) {
     }
 
     @Override

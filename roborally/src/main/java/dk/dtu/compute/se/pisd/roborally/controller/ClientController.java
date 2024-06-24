@@ -9,10 +9,8 @@ import dk.dtu.compute.se.pisd.roborally.model.Board;
 import dk.dtu.compute.se.pisd.roborally.model.PlayerInfo;
 
 import java.io.*;
-import java.net.HttpURLConnection;
+import java.net.*;
 import java.net.http.HttpClient;
-import java.net.URI;
-import java.net.URL;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
@@ -34,13 +32,13 @@ public class ClientController {
 
 
     private static void startApiTask(GameController gameController) {
-        if (apiTask != null) {
+       /* if (apiTask != null) {
             apiTask.stopApiTask();
         }
 
         apiTask = new ApiTask(gameController);
         Thread apiThread = new Thread(apiTask);
-        apiThread.start();
+        apiThread.start();*/
     }
 
     public ClientController(AppController appController) {
@@ -160,7 +158,7 @@ public class ClientController {
             e.printStackTrace();
         }
     }
-    public void putDataJson(String ip, String jsonData) {
+    /*public void putDataJson(String ip, String jsonData) {
         try {
             URL url = new URL(PlayerInfo.URLPath+"/data");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -172,6 +170,7 @@ public class ClientController {
             try (OutputStream os = connection.getOutputStream()) {
                 byte[] input = jsonData.getBytes("utf-8");
                 os.write(input, 0, input.length);
+                //System.out.println("read os stream uf14");
             }
 
             int responseCode = connection.getResponseCode();
@@ -191,6 +190,72 @@ public class ClientController {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }*/
+
+    // sends a put and get to the servers "data.json" based on local json
+    public void putDataJson(String ip, String jsonData) throws IOException, InterruptedException {
+        try {
+            System.out.println("Connecting to URL: " + PlayerInfo.URLPath + "/data");
+            URL url = new URL(PlayerInfo.URLPath + "/data");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PUT");
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Accept", "application/json");
+
+            System.out.println("Sending JSON data: " + jsonData);
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = jsonData.getBytes("utf-8");
+                os.write(input, 0, input.length);
+
+            }
+
+            int responseCode = connection.getResponseCode();
+            System.out.println("Response Code: " + responseCode);
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                System.out.println("Server response: " + response.toString());
+            } else {
+                System.out.println("PUT request failed. Response Code: " + responseCode);
+            }
+        } catch (Exception e) {
+            System.err.println("Error during HTTP PUT");
+            e.printStackTrace();
+        }
+
+        // U16
+
+        // U16
+    }
+    //Gets Json to Local based on url and path
+    public void GetDataJson() throws IOException {
+        URL url_get = new URL(PlayerInfo.URLPath + "/data.json");
+        HttpURLConnection connection_get = (HttpURLConnection) url_get.openConnection();
+
+        connection_get.setRequestMethod("GET");
+        connection_get.setRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate");
+        connection_get.setRequestProperty("Accept", "application/json");
+
+        int responseCode_get = connection_get.getResponseCode();
+        if (responseCode_get == 200) {
+            BufferedReader in_get = new BufferedReader(new InputStreamReader(connection_get.getInputStream()));
+            String inputLine_get;
+            StringBuilder response_get = new StringBuilder();
+
+            while ((inputLine_get = in_get.readLine()) != null) {
+                response_get.append(inputLine_get);
+            }
+            in_get.close();
+            System.out.println("response u16: "+response_get.toString());
         }
     }
 
@@ -278,7 +343,7 @@ public class ClientController {
 
         // Initialize the board and game controller
 // Start the ApiTask thread
-        startApiTask(gameController);
+        //startApiTask(gameController);
 
 
 // Start the ApiTask threadstartApiTask(gameController);

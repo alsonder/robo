@@ -21,9 +21,7 @@
  */
 package dk.dtu.compute.se.pisd.roborally.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.google.gson.annotations.Expose;
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
 import org.jetbrains.annotations.NotNull;
@@ -53,7 +51,9 @@ public class Player extends Subject {
         this.turn = turn;
     }
 
-    @JsonBackReference("board-players")
+
+
+    @JsonIgnore
     final public Board board;
     @Expose
     private String name;

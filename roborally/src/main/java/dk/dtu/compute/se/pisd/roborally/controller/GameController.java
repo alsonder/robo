@@ -22,6 +22,7 @@
 package dk.dtu.compute.se.pisd.roborally.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -324,6 +325,10 @@ public class GameController {
     }
 
     public void executeStep() throws IOException {
+        // Continue the program execution
+        board.setStepMode(true);
+        continuePrograms();
+        // Above code used to be at bottom
         // Load the existing JSON data
         /*ClassLoader classLoader = Main.class.getClassLoader();
         InputStream inputStream = classLoader.getResourceAsStream("activeGames/data.json");
@@ -379,40 +384,64 @@ public class GameController {
             JsonNode rootNode = mapper.readTree(fis);
 
             // Print out the entire JSON for inspection
-            System.out.println("Entire JSON content:");
-            System.out.println(rootNode.toPrettyString());
+            //System.out.println("Entire JSON content:");
+            //System.out.println(rootNode.toPrettyString());
 
             // Check specifically for 'players'
             if (rootNode.has("players")) {
-                System.out.println("'players' node exists.");
+                //System.out.println("'players' node exists.");
                 JsonNode playersNode = rootNode.get("players");
 
                 if (playersNode.isArray()) {
-                    System.out.println("'players' node is an array.");
+                    //System.out.println("'players' node is an array.");
                     ArrayNode players = (ArrayNode) playersNode;
-                    ObjectNode player1 = null;
+                    //ObjectNode player1 = null;
+                    int player_num=-1;
+                    for (int i = 0; i < board.getPlayers().size(); i++)
+                    {
+                        System.out.println("players : "+board.getPlayer(i).getName() );
+                        if (Objects.equals(board.getPlayer(i).getName(), PlayerInfo.PlayerNumber)) {
+                            if (i+1==board.getPlayers().size()){
+                                PlayerInfo.GlobalnextPlayer = mapper.valueToTree(board.getPlayer(0));
+                                player_num = 0;
+                                System.out.println("Pnum0: "+board.getPlayer(0).getName());
+                            }
+                            else {
+                                PlayerInfo.GlobalnextPlayer = mapper.valueToTree(board.getPlayer(i+1));
+                                player_num = i+1;
+                                System.out.println("Pnum non0: "+board.getPlayer(i).getName());
+                            }
+                            break;
+                       }
+                    }
+                    System.out.println("uf15s boardplayername of next player "+board.getPlayer(player_num).getName());
 
                     for (JsonNode player : players) {
-                        if (player.isObject() && "Player 1".equals(player.get("name").asText())) {
-                            player1 = (ObjectNode) player;
-                            System.out.println("Player 1 found and accessed.");
+                        if (player.isObject() && board.getPlayer(player_num).getName().equals(player.get("name").asText())) { //"Player 1"
+                            //player1 = (ObjectNode) player;
+                            PlayerInfo.GlobalnextPlayer = (ObjectNode) player;
+                            System.out.println("Player found and accessed." + player.toString());
+                            System.out.println("GloalNex PL : "+PlayerInfo.GlobalnextPlayer.toString());
                             break;
                         }
                     }
 
-                    // MOD current to pl1
-                    if (player1 != null) {
+                    // MOD current to next player
+                    if (PlayerInfo.GlobalnextPlayer != null) { //player1
                         ObjectNode currentPlayer = (ObjectNode) rootNode.path("current");
-                        currentPlayer.setAll(player1);
-                        System.out.println("Current player's values set to Player 1.");
+                        currentPlayer.setAll(PlayerInfo.GlobalnextPlayer); //player1
+                        //System.out.println("Current player's values set to Player 1.");
                         System.out.println("Entire JSON content after:");
-                        System.out.println(rootNode.toPrettyString());
+                        //System.out.println(rootNode.toPrettyString());
                         try (FileOutputStream fos = new FileOutputStream(jsonFile)) {
                             mapper.writerWithDefaultPrettyPrinter().writeValue(fos, rootNode);
                             System.out.println("JSON file has been updated successfully.");
+                        }catch (Exception e){
+                            System.out.println("ERROR HERE rootnode not correct");
                         }
                         //
                         ClientController clientController = new ClientController(appController);
+                        //System.out.println("rootnode:"+rootNode.toPrettyString());
                         clientController.putDataJson(ip, rootNode.toPrettyString());
                         //
                     } else {
@@ -426,11 +455,14 @@ public class GameController {
             }
         } catch (IOException e) {
             System.err.println("Error processing JSON file: " + e.getMessage());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
-
+        //
         // Continue the program execution
-        board.setStepMode(true);
-        continuePrograms();
+        //board.setStepMode(true);
+        //continuePrograms();
+        //
     }
 
 
@@ -455,6 +487,8 @@ public class GameController {
             clientController.putBoardJson(ip, jsonData);*/
             // UFFE s9
 
+            // U16
+            /*
             for (int i = 0; i < board.getPlayers().size(); i++) {
                 if(Objects.equals(board.getPlayer(i).getName(), PlayerInfo.PlayerNumber)){
                     playerViews[i].setDisable(true);
@@ -462,7 +496,8 @@ public class GameController {
                         playerViews[i+1].setDisable(false);
                     } else playerViews[0].setDisable(false);
                 }
-            }
+            }*/
+            //U16
 
             // UFFE e9
         } while (board.getPhase() == Phase.ACTIVATION && !board.isStepMode());
@@ -484,11 +519,17 @@ public class GameController {
                 }
                 int nextPlayerNumber = (board.getPlayerNumber(currentPlayer) + 1) % board.getPlayersNumber();
 
+                // updates the local json
+                //l
                 // Update the JSON file with the new turn values
-                try {
+
+                /*try {
                     Path filePath = Paths.get("src/main/resources/activeGames/data.json");
                     ObjectMapper objectMapper = new ObjectMapper();
+                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
                     GameController.GameData gameData = objectMapper.readValue(filePath.toFile(), GameController.GameData.class);
+
 
                     // Set the turn of the current player to false
                     for (Player player : gameData.getPlayers()) {
@@ -511,6 +552,7 @@ public class GameController {
                     // Save the updated game data back to the JSON file
                     objectMapper.writerWithDefaultPrettyPrinter().writeValue(filePath.toFile(), gameData);
 
+
                     // Update the current player in the board
                     board.setCurrentPlayer(nextPlayer);
                 } catch (IOException e) {
@@ -518,6 +560,11 @@ public class GameController {
                     System.err.println("Failed to update JSON file: " + e.getMessage());
                 }
 
+                 */
+
+
+                //l
+                //
                 if (step + 1 < Player.NO_REGISTERS) {
                     board.setStep(step + 1);
                     board.setCurrentPlayer(board.getPlayer(0)); // Keep the same player

@@ -21,6 +21,10 @@
  */
 package dk.dtu.compute.se.pisd.roborally.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.google.gson.annotations.Expose;
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +34,7 @@ import java.util.List;
 
 import static dk.dtu.compute.se.pisd.roborally.model.Phase.INITIALISATION;
 
+
 /**
  * ...
  *
@@ -37,6 +42,7 @@ import static dk.dtu.compute.se.pisd.roborally.model.Phase.INITIALISATION;
  *
  */
 public class Board extends Subject {
+
 
     public final int width;
 
@@ -47,8 +53,9 @@ public class Board extends Subject {
     private Integer gameId;
 
     private final Space[][] spaces;
+
     @Expose
-    private final List<Player> players = new ArrayList<>();
+    private List<Player> players = new ArrayList<>();
     @Expose
     private Player current;
     @Expose
@@ -61,6 +68,44 @@ public class Board extends Subject {
     private List<Space> spawnSpaces = new ArrayList<>();
     @Expose
     private String map = "defaultboard";
+
+    /**/
+    /*
+    @JsonCreator
+    public Board(@JsonProperty("width") int width,
+                 @JsonProperty("height") int height,
+                 @JsonProperty("numberOfCheckPoints") int numberOfCheckPoints,
+                 @JsonProperty("players") List<Player> players,
+                 @JsonProperty("current") Player current,
+                 @JsonProperty("phase") Phase phase,
+                 @JsonProperty("step") int step,
+                 @JsonProperty("stepMode") boolean stepMode,
+                 @JsonProperty("spawnSpaces") List<Space> spawnSpaces,
+                 @JsonProperty("map") String map) {
+        this.width = width;
+        this.height = height;
+        this.numberOfCheckPoints = numberOfCheckPoints;
+        this.players = players;
+        this.current = current;
+        this.phase = phase;
+        this.step = step;
+        this.stepMode = stepMode;
+        this.spawnSpaces = spawnSpaces;
+        this.map = map;
+        this.spaces = new Space[width][height];
+        initializeSpaces();  // Initialize spaces based on width and height
+    }
+
+    private void initializeSpaces() {
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                spaces[x][y] = new Space(this, x, y);
+            }
+        }
+    }*/
+    /**/
+
+
 
     public Board(int width, int height, int numberOfCheckPoints) {
         this.width = width;
