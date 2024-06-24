@@ -1,6 +1,7 @@
 package dk.dtu.compute.se.pisd.roborally.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dtu.compute.se.pisd.roborally.model.PlayerInfo;
 
@@ -70,6 +71,9 @@ public class ClientController {
 
     }
 
+
+
+    /*
     public void connectServer(String ip) {
         try {
             URL url = new URL("http://" + ip + ":8080/games/game1/board");
@@ -120,6 +124,7 @@ public class ClientController {
             e.printStackTrace();
         }
     }
+    */
 
     public void putBoardJson(String ip, String jsonData) {
         try {
@@ -155,34 +160,36 @@ public class ClientController {
         }
     }
 
-    public static List<String> getListOfPlayers(String game){
-            HttpRequest request = HttpRequest.newBuilder()
-                    .GET()
-                    .uri(URI.create("http://" + ip+ ":8080/games/" + game + "/players"))
-                    .build();
+    public static List<String> getListOfPlayers(String game) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(URI.create("http://" + "10.209.140.39" + ":8080/games/" + game + "/players"))
+                .build();
 
-            CompletableFuture<HttpResponse<String>> response =
-                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        CompletableFuture<HttpResponse<String>> response =
+                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
 
-            String result = null;
-            try {
-                result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                throw new RuntimeException(e);
-            }
+        String result = null;
+        try {
+            result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
 
-            // Parse the JSON response to extract player names
-            ObjectMapper objectMapper = new ObjectMapper();
-            List<String> playerNames;
-            try {
-                JsonNode root = objectMapper.readTree(result);
-                playerNames = objectMapper.convertValue(root.get("players"), new TypeReference<List<JsonNode>>() {})
-                        .stream()
-                        .map(node -> node.get("name").asText())
-                        .collect(Collectors.toList());
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to parse players.json", e);
-            }
+        // Check if the result is empty
+        if (result.trim().isEmpty()) {
+            return List.of(); // Return an empty list if the result is empty
+        }
+
+        // Split the response by comma and newline to extract player names
+        List<String> playerNames;
+        try {
+            playerNames = Arrays.stream(result.split(",\n"))
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse players.txt", e);
+        }
 
         return playerNames;
     }
@@ -193,6 +200,7 @@ public class ClientController {
 
         // Determine the next player name
         int nextPlayerNumber = players.size() + 1;
+        PlayerInfo.URLPath = "http://"+ip+":8080/games/"+game;
         String newPlayerName = "Player " + nextPlayerNumber;
         PlayerInfo.PlayerNumber = newPlayerName;
 
@@ -214,5 +222,70 @@ public class ClientController {
         }
 
         return newPlayerName;
+    }
+
+    // sends a put and get to the servers "data.json" based on local json
+    public void putDataJson(String ip, String jsonData) throws IOException, InterruptedException {
+        try {
+            System.out.println("Connecting to URL: " + PlayerInfo.URLPath + "/data");
+            URL url = new URL(PlayerInfo.URLPath + "/data");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PUT");
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Accept", "application/json");
+
+            System.out.println("Sending JSON data: " + jsonData);
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = jsonData.getBytes("utf-8");
+                os.write(input, 0, input.length);
+
+            }
+            int responseCode = connection.getResponseCode();
+            System.out.println("Response Code: " + responseCode);
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                System.out.println("Server response: " + response.toString());
+            } else {
+                System.out.println("PUT request failed. Response Code: " + responseCode);
+            }
+        } catch (Exception e) {
+            System.err.println("Error during HTTP PUT");
+            e.printStackTrace();
+        }
+
+        // U16
+
+        // U16
+    }
+    //Gets Json to Local based on url and path
+    public void GetDataJson() throws IOException {
+        URL url_get = new URL(PlayerInfo.URLPath + "/data.json");
+        HttpURLConnection connection_get = (HttpURLConnection) url_get.openConnection();
+
+        connection_get.setRequestMethod("GET");
+        connection_get.setRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate");
+        connection_get.setRequestProperty("Accept", "application/json");
+
+        int responseCode_get = connection_get.getResponseCode();
+        if (responseCode_get == 200) {
+            BufferedReader in_get = new BufferedReader(new InputStreamReader(connection_get.getInputStream()));
+            String inputLine_get;
+            StringBuilder response_get = new StringBuilder();
+
+            while ((inputLine_get = in_get.readLine()) != null) {
+                response_get.append(inputLine_get);
+            }
+            in_get.close();
+            System.out.println("response u16: "+response_get.toString());
+        }
     }
 }

@@ -286,11 +286,12 @@ public class GameController {
         continuePrograms();
     }
 
-    public void executeStep() throws IOException {
+    public void executeStep() throws IOException, InterruptedException {
         // UFFE s1
         String jsonData = new String(Files.readAllBytes(Paths.get("src/main/resources/boards/test.json")));
         ClientController clientController = new ClientController(appController);
-        clientController.putBoardJson(ip, jsonData);
+        //clientController.putBoardJson(ip, jsonData);
+        clientController.putDataJson(ip,jsonData);
         // UFFE s2
         Thread GetData = null;
         if (board.getStep()==0&&board.getCurrentPlayer()==board.getPlayer(0))
@@ -298,7 +299,8 @@ public class GameController {
                 GetData = new Thread(new ApiTask());
                 System.out.println("started" + board.getPlayer(i).getName());
             }
-        System.out.println(board.getCurrentPlayer().getName());        if (board.getStep()==4&&board.getCurrentPlayer()==board.getPlayer(board.getPlayers().size()-1))
+        System.out.println(board.getCurrentPlayer().getName());
+        if (board.getStep()==4&&board.getCurrentPlayer()==board.getPlayer(board.getPlayers().size()-1))
             for (int j = 0; j < board.getPlayers().size(); j++) {
                 if (GetData != null) {
                     GetData.interrupt();

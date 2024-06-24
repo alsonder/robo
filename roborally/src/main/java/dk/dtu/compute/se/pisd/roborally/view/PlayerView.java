@@ -22,6 +22,7 @@
 package dk.dtu.compute.se.pisd.roborally.view;
 
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
+import dk.dtu.compute.se.pisd.roborally.controller.ClientController;
 import dk.dtu.compute.se.pisd.roborally.controller.GameController;
 import dk.dtu.compute.se.pisd.roborally.model.*;
 import javafx.geometry.Pos;
@@ -33,6 +34,8 @@ import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+
+import static dk.dtu.compute.se.pisd.roborally.fileaccess.model.IP.ip;
 
 /**
  * ...
@@ -58,11 +61,15 @@ public class PlayerView extends Tab implements ViewObserver {
 
     private Button finishButton;
     private Button executeButton;
+
+    private Button updateButton;
     private Button stepButton;
 
     private VBox playerInteractionPanel;
 
     private GameController gameController;
+
+    private ClientController clientController;
 
     private Label energyCubesLabel;
 
@@ -103,16 +110,21 @@ public class PlayerView extends Tab implements ViewObserver {
         executeButton = new Button("Execute Program");
         executeButton.setOnAction( e-> gameController.executePrograms());
 
+        updateButton = new Button("Update Game");
+        updateButton.setOnAction(e-> gameController.notImplemented());
+
         stepButton = new Button("Execute Current Register");
         stepButton.setOnAction( e-> {
             try {
                 gameController.executeStep();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
             }
         });
 
-        buttonPanel = new VBox(finishButton, executeButton, stepButton);
+        buttonPanel = new VBox(finishButton, executeButton, stepButton, updateButton);
         buttonPanel.setAlignment(Pos.CENTER_LEFT);
         buttonPanel.setSpacing(3.0);
         // programPane.add(buttonPanel, Player.NO_REGISTERS, 0); done in update now
