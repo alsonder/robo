@@ -269,11 +269,6 @@ public class GameController {
     }
 
     public void finishProgrammingPhase() {
-        // UFFE s
-        /*for (int i = 0; i < board.getPlayers().size(); i++) {
-            Thread GetData = new Thread(new ApiTask());
-        }*/
-        // UFFE e
         makeProgramFieldsInvisible();
         makeProgramFieldsVisible(0);
         board.setPhase(Phase.ACTIVATION);
@@ -287,34 +282,23 @@ public class GameController {
     }
 
     public void executeStep() throws IOException {
-        // UFFE s1
-        String jsonData = new String(Files.readAllBytes(Paths.get("src/main/resources/boards/test.json")));
-        ClientController clientController = new ClientController(appController);
-        clientController.putBoardJson(ip, jsonData);
-        // UFFE s2
-        Thread GetData = null;
-        if (board.getStep()==0&&board.getCurrentPlayer()==board.getPlayer(0))
-            for (int i = 0; i < board.getPlayers().size(); i++) {
-                GetData = new Thread(new ApiTask());
-                System.out.println("started" + board.getPlayer(i).getName());
-            }
-        System.out.println(board.getCurrentPlayer().getName());        if (board.getStep()==4&&board.getCurrentPlayer()==board.getPlayer(board.getPlayers().size()-1))
-            for (int j = 0; j < board.getPlayers().size(); j++) {
-                if (GetData != null) {
-                    GetData.interrupt();
-                }
-                System.out.println("Stopped "+board.getPlayer(j).getName());
-            }
-            /*
-        for (int i = 0; i < board.getPlayers().size(); i++) {
-            board.getPlayer(i).setSpace(read json file and find the space that the player should be on);
-            board.getPlayer(i).setHeading(read json file for player and set heading);
-            board.getPlayer(i).setCheckPoint(read json and get checkpoint correct);
-        }*/
-
-        //UFFE e
         board.setStepMode(true);
         continuePrograms();
+        // after a move send it to server new new new
+        System.out.println("halllooooooooooooooooo");
+        String jsonGet = ClientController.getBoardJSON();
+        System.out.println(jsonGet);
+        System.out.println("halllooooooooooooooooo");
+
+        String jsonModified = JsonModifier.modifyJson(jsonGet,board);
+        System.out.println(jsonModified);
+        try {
+            ClientController.putDataJson(ip,jsonModified);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void continuePrograms() {
@@ -350,7 +334,6 @@ public class GameController {
                         board.setStep(step);
                         board.setCurrentPlayer(board.getPlayer(0));
                     }
-
                      else {
 
                         for(Player player:board.getPlayers()){

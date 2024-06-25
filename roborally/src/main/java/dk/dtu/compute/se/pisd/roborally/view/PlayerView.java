@@ -35,6 +35,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
+import static dk.dtu.compute.se.pisd.roborally.controller.GameController.board;
+
 /**
  * ...
  *
@@ -102,7 +104,10 @@ public class PlayerView extends Tab implements ViewObserver {
         //      players, but on the PlayersView (view for all players). This should be
         //      refactored.
         updateButton = new Button("Update Board");
-        updateButton.setOnAction(e -> ClientController.getBoardJSON());
+        updateButton.setOnAction(e -> {
+            String serverJson = ClientController.getBoardJSON();
+            JsonModifier.getJson(serverJson,board);
+        });
 
         finishButton = new Button("Finish Programming");
         finishButton.setOnAction( e -> gameController.finishProgrammingPhase());

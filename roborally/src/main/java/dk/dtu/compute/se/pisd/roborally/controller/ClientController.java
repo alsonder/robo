@@ -15,7 +15,6 @@ import java.net.URL;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -421,8 +420,7 @@ public class ClientController {
 
     }
 
-    public static void getBoardJSON() {
-
+    public static String getBoardJSON() {
 
         HttpURLConnection connection = null;
         try {
@@ -453,6 +451,8 @@ public class ClientController {
                     System.out.println("JSON saved to " + filePath);
                      */
                     System.out.println("saved:" + response.body());
+                    return response.body();
+
                 } else {
                     System.out.println("Failed to get a successful response: Status code = " + response.statusCode());
                 }
@@ -467,5 +467,6 @@ public class ClientController {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
+        return null;
     }
 }
