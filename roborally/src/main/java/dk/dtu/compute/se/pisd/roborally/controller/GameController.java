@@ -337,16 +337,22 @@ public class GameController {
                     }
                     executeCommand(currentPlayer, command, step);  // Correctly include the step as the register index
                 }
+
                 int nextPlayerNumber = board.getPlayerNumber(currentPlayer) + 1;
                 if (nextPlayerNumber < board.getPlayersNumber()) {
                     board.setCurrentPlayer(board.getPlayer(nextPlayerNumber));
-                } else {
+                }
+
+                else {
                     step++;
                     if (step < Player.NO_REGISTERS) {
                         makeProgramFieldsVisible(step);
                         board.setStep(step);
                         board.setCurrentPlayer(board.getPlayer(0));
-                    } else {
+                    }
+
+                     else {
+
                         for(Player player:board.getPlayers()){
                             Space space = player.getSpace();
                             for(FieldAction action: space.getActions()){

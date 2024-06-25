@@ -22,6 +22,7 @@
 package dk.dtu.compute.se.pisd.roborally.view;
 
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
+import dk.dtu.compute.se.pisd.roborally.controller.ClientController;
 import dk.dtu.compute.se.pisd.roborally.controller.GameController;
 import dk.dtu.compute.se.pisd.roborally.model.*;
 import javafx.geometry.Pos;
@@ -56,6 +57,8 @@ public class PlayerView extends Tab implements ViewObserver {
 
     private VBox buttonPanel;
 
+    private Button updateButton;
+
     private Button finishButton;
     private Button executeButton;
     private Button stepButton;
@@ -63,6 +66,8 @@ public class PlayerView extends Tab implements ViewObserver {
     private VBox playerInteractionPanel;
 
     private GameController gameController;
+
+    private ClientController clientController;
 
     private Label energyCubesLabel;
 
@@ -96,6 +101,8 @@ public class PlayerView extends Tab implements ViewObserver {
         // XXX  the following buttons should actually not be on the tabs of the individual
         //      players, but on the PlayersView (view for all players). This should be
         //      refactored.
+        updateButton = new Button("Update Board");
+        updateButton.setOnAction(e -> ClientController.getBoardJSON());
 
         finishButton = new Button("Finish Programming");
         finishButton.setOnAction( e -> gameController.finishProgrammingPhase());
@@ -112,7 +119,7 @@ public class PlayerView extends Tab implements ViewObserver {
             }
         });
 
-        buttonPanel = new VBox(finishButton, executeButton, stepButton);
+        buttonPanel = new VBox(updateButton, finishButton, executeButton, stepButton);
         buttonPanel.setAlignment(Pos.CENTER_LEFT);
         buttonPanel.setSpacing(3.0);
         // programPane.add(buttonPanel, Player.NO_REGISTERS, 0); done in update now
