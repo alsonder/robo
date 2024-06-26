@@ -36,6 +36,12 @@ public class ClientController {
 
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
+    /***
+     * Gets the games from the server to join
+     * @param ip for the path
+     * @return retruns a list over the games
+     * @author Anders J
+     */
     public static List<String> getListOfGames(String ip) {
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -66,13 +72,6 @@ public class ClientController {
         return gamesList;
     }
 
-    public static void startNewGame(String id) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString("id"))
-                .uri(URI.create("http://" + "10.209.140.39" + ":8080/games/game1/board"))
-                .build();
-
-    }
 
     public void connectServer(String ip) {
         try {
@@ -122,6 +121,12 @@ public class ClientController {
         }
     }
 
+    /***
+     * Sends the board to the server
+     * @param ip ip for the path
+     * @param jsonData the json board file
+     * @author Uffe C
+     */
     public void putBoardJson(String ip, String jsonData) {
         try {
             URL url = new URL("http://" + ip + ":8080/games/game1/board");
@@ -156,6 +161,12 @@ public class ClientController {
         }
     }
 
+    /***
+     * Gets the list of players there are joined a game
+     * @param game game for the path folder
+     * @return the list of the player names
+     * @author Anders J
+     */
     public static List<String> getListOfPlayers(String game) {
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
@@ -172,12 +183,10 @@ public class ClientController {
             throw new RuntimeException(e);
         }
 
-        // Check if the result is empty
         if (result.trim().isEmpty()) {
-            return List.of(); // Return an empty list if the result is empty
+            return List.of();
         }
 
-        // Split the response by comma and newline to extract player names
         List<String> playerNames;
         try {
             playerNames = Arrays.stream(result.split(",\n"))
@@ -190,16 +199,21 @@ public class ClientController {
         return playerNames;
     }
 
+    /***
+     * Takes the list of players and add the next player in line to it
+     * @param game the game folder for the path
+     * @return the name of the just added Player
+     * @throws IOException
+     * @author Anders J and Uffe C
+     */
     public static String addPlayer(String game) throws IOException {
-        // Get the current list of players
-        List<String> players = getListOfPlayers(game);
 
-        // Determine the next player name
+        List<String> players = getListOfPlayers(game);
         int nextPlayerNumber = players.size() + 1;
         String newPlayerName = "Player " + nextPlayerNumber;
         PlayerInfo.URLPath = "http://" + ip + ":8080/games/" + game;
         PlayerInfo.PlayerNumber = newPlayerName;
-        //u18
+
         String startJson = ("""
                 {
                   "players" : [ {
@@ -345,19 +359,9 @@ public class ClientController {
             throw new RuntimeException(e);
         }
 
-        // Initialize the board and game controller
         Board board = LoadBoard.loadBoard("defaultboard"); // Load the board here
         GameController gameController = new GameController(appController, board);
 
-        // Initialize the board and game controller
-// Start the ApiTask thread
-        //startApiTask(gameController);
-
-
-// Start the ApiTask threadstartApiTask(gameController);
-
-
-        // Create the POST request to add the new player
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString("playerName=" + newPlayerName))
                 .header("Content-Type", "application/x-www-form-urlencoded")
@@ -377,6 +381,14 @@ public class ClientController {
         return newPlayerName;
     }
 
+    /***
+     * Send the data json to the server and overwrite the one on the server
+     * @param ip used for the path to the server
+     * @param jsonData  the data it sends as json
+     * @throws IOException
+     * @throws InterruptedException
+     * @author Uffe C
+     */
     public static void putDataJson(String ip, String jsonData) throws IOException, InterruptedException {
         try {
             System.out.println("Connecting to URL: " + PlayerInfo.URLPath + "/data");
@@ -416,17 +428,13 @@ public class ClientController {
         }
     }
 
-    public void sendPlayersLocation() {
-
-    }
-
+    /***
+     * Get the data json file from the server
+     * @return  the body of the json file
+     * @author Uffe C
+     */
     public static String getBoardJSON() {
-
-        HttpURLConnection connection = null;
         try {
-            //
-            //
-            //
             HttpClient client = HttpClient.newHttpClient();
             URL url = new URL(PlayerInfo.URLPath + "/data");
             HttpRequest request = HttpRequest.newBuilder()
@@ -440,16 +448,6 @@ public class ClientController {
 
                 if (response.statusCode() == 200) {
                     System.out.println("Response received successfully.");
-                    /*
-                    Path projectRootDir = Paths.get(System.getProperty("user.dir"));
-                    Path customDir = projectRootDir.resolve("roborally/src/main/resources/activeGames");
-                    Files.createDirectories(customDir); // Ensure the directory exists
-                    Path filePath = customDir.resolve("data");
-
-                    Files.writeString(filePath, response.body());
-
-                    System.out.println("JSON saved to " + filePath);
-                     */
                     System.out.println("saved:" + response.body());
                     return response.body();
 
@@ -459,10 +457,6 @@ public class ClientController {
             } catch (IOException | InterruptedException f) {
                 System.err.println("Error during HTTP call: " + f.getMessage());
             }
-            //
-            //
-            //
-
 
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);

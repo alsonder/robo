@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.net.URL;
 
+/***
+ * Made to save data we get from the server
+ * @author Anders J and Uffe C
+ */
 public class PlayerInfo {
     public static volatile String PlayerNumber;
 

@@ -5,6 +5,14 @@ import org.json.JSONObject;
 
 public class JsonModifier {
 
+    /***
+     * Takes the json data file from the clien and modifies it so its true
+     * to the game state
+     * @param jsonInput player data
+     * @param board the game board it's played on
+     * @return the new state of the game in json format
+     * @author Anders J and Uffe B
+     */
     public static String modifyJson(String jsonInput, Board board) {
 
         try {
@@ -54,6 +62,12 @@ public class JsonModifier {
       return null;
     }
 
+    /***
+     * Takes a json file and put the new data into the board state
+     * @param js json file from the server
+     * @param board the board the data is placed
+     * @author Anders J and Uffe C
+     */
     public static void getJson(String js, Board board){
         try {
             JSONObject jsonObject = new JSONObject(js);

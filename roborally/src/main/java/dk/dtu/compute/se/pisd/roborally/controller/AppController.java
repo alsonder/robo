@@ -112,13 +112,7 @@ public class AppController implements Observer {
             }
         });
 
-        Button createGameButton = new Button("Create new game");
-        createGameButton.setOnAction(e -> {
-            createGame();
-            dialog.close(); // Close dialog after action
-        });
-
-        vbox.getChildren().addAll(label, listView, createGameButton);
+        vbox.getChildren().addAll(label, listView);
         dialog.getDialogPane().setContent(vbox);
 
         // Add button type
@@ -186,24 +180,7 @@ public class AppController implements Observer {
 
 
 
-    private void createGame() {
-        System.out.println("Creating a new game...");
-        // Add logic to create a new game
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("State a game ID");
-        Optional<String> result = dialog.showAndWait();
-        if(result.isPresent()) {
-            ClientController.startNewGame(result.get());
-        }
-    }
-
     public void startGame(){
-        /*
-        ChoiceDialog<Integer> dialog = new ChoiceDialog<>(PLAYER_NUMBER_OPTIONS.get(0), PLAYER_NUMBER_OPTIONS);
-        dialog.setTitle("Player number");
-        dialog.setHeaderText("Select number of players");
-        Optional<Integer> result = dialog.showAndWait();
-        */
 
         if (PlayerInfo.NumberOfPlayers >= 2) {
             if (gameController != null) {
@@ -276,46 +253,6 @@ public class AppController implements Observer {
         }
     }
 
-    /*public void newGame1() throws IOException, InterruptedException {
-        ChoiceDialog<Integer> dialog = new ChoiceDialog<>(PLAYER_NUMBER_OPTIONS.get(0), PLAYER_NUMBER_OPTIONS);
-        dialog.setTitle("Player number");
-        dialog.setHeaderText("Select number of players");
-        Optional<Integer> result = dialog.showAndWait();
-
-        if (result.isPresent()) {
-            if (gameController != null) {
-                // The UI should not allow this, but in case this happens anyway.
-                // give the user the option to save the game or abort this operation!
-                if (!stopGame()) {
-                    return;
-                }
-            }
-
-            int no = result.get();
-            List<String> playerColors = PLAYER_COLORS.subList(0, no);
-            List<String> playerNames = IntStream.range(0, no)
-                    .mapToObj(i -> "Player " + (i + 1))
-                    .collect(Collectors.toList());
-
-            // Create a HttpClient to send the POST request
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8080/game")) // Replace with your server's URL
-                    .POST(HttpRequest.BodyPublishers.ofString(
-                            String.format("{\"playerColors\": %s, \"playerNames\": %s}", playerColors, playerNames)))
-                    .header("Content-Type", "application/json")
-                    .build();
-
-            // Send the POST request
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            // Parse the response to get the game ID
-            //String gameId = new JSONObject(response.body()).getString("gameId");
-
-            // Load the game from the server
-            loadGame();
-        }
-    }*/
     private Optional<ButtonType> showAlert(String message) {
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setHeaderText(message);

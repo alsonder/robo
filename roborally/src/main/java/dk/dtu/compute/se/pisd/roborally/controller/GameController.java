@@ -50,20 +50,6 @@ public class GameController {
         this.appController = appController;
         GameController.board = board;
     }
-
-    public void hitPlayer(Space space, Heading heading){
-        Space target = board.getNeighbour(space, heading);
-        if (target.getPlayer() != null ){
-            Player  move = target.getPlayer();
-            Heading headMove = move.getHeading();
-            move.setHeading(heading);
-            move1(move);
-            move.setHeading(headMove);
-        }
-    }
-
-
-
     public void move1(@NotNull Player player) {
 
         if (player.board == board) {
@@ -312,6 +298,11 @@ public class GameController {
         continuePrograms();
     }
 
+    /***
+     * updated executeStep, so it send a put request to the server
+     * @throws IOException
+     * @author Anders J and Uffe C
+     */
     public void executeStep() throws IOException {
         board.setStepMode(true);
         continuePrograms();
