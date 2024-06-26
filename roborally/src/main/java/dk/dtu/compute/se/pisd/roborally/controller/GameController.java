@@ -22,15 +22,12 @@
 package dk.dtu.compute.se.pisd.roborally.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dk.dtu.compute.se.pisd.roborally.fileaccess.model.ApiTask;
 import dk.dtu.compute.se.pisd.roborally.model.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,10 +51,21 @@ public class GameController {
         GameController.board = board;
     }
 
+    public void hitPlayer(Space space, Heading heading){
+        Space target = board.getNeighbour(space, heading);
+        if (target.getPlayer() != null ){
+            Player  move = target.getPlayer();
+            Heading headMove = move.getHeading();
+            move.setHeading(heading);
+            move1(move);
+            move.setHeading(headMove);
+        }
+    }
 
 
 
     public void move1(@NotNull Player player) {
+
         if (player.board == board) {
             Space space = player.getSpace();
             Heading heading = player.getHeading();
@@ -73,7 +81,11 @@ public class GameController {
                 }
             }
         }
-    }
+
+
+            }
+
+
 
     // TODO Assignment A3
     public void move2(@NotNull Player player) {
@@ -157,17 +169,24 @@ public class GameController {
         int step = board.getStep();
         Player currentPlayer = board.getCurrentPlayer();
         executeCommand(currentPlayer, option, step);
+
+
+
         board.setPhase(Phase.ACTIVATION);
         int nextPlayerNumber = board.getPlayerNumber(currentPlayer) + 1;
         if (nextPlayerNumber < board.getPlayersNumber()) {
             board.setCurrentPlayer(board.getPlayer(nextPlayerNumber));
-        } else {
+        }
+
+        else {
             step++;
             if (step < Player.NO_REGISTERS) {
                 makeProgramFieldsVisible(step);
                 board.setStep(step);
                 board.setCurrentPlayer(board.getPlayer(0));
-            } else {
+            }
+            else {
+
                 for(Player player:board.getPlayers()){
                     Space space = player.getSpace();
                     for(FieldAction action: space.getActions()){
@@ -177,6 +196,18 @@ public class GameController {
                 gameWon();
                 startProgrammingPhase();
             }
+        }
+        // after a move send it to server new new new
+        String jsonGet = ClientController.getBoardJSON();
+
+        String jsonModified = JsonModifier.modifyJson(jsonGet,board);
+        System.out.println(jsonModified);
+        try {
+            ClientController.putDataJson(ip,jsonModified);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -285,10 +316,7 @@ public class GameController {
         board.setStepMode(true);
         continuePrograms();
         // after a move send it to server new new new
-        System.out.println("halllooooooooooooooooo");
         String jsonGet = ClientController.getBoardJSON();
-        System.out.println(jsonGet);
-        System.out.println("halllooooooooooooooooo");
 
         String jsonModified = JsonModifier.modifyJson(jsonGet,board);
         System.out.println(jsonModified);

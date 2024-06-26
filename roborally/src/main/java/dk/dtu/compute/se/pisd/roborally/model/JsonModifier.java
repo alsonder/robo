@@ -72,7 +72,7 @@ public class JsonModifier {
                 if (player.getName().equals("Player " + (i + 1))) {
                     JSONObject space = playerJson.getJSONObject("space");
 
-                    board.getPlayer(i).setSpace(new Space(board, space.getInt("x"), space.getInt("y") ));
+                    board.getPlayer(i).setSpace(board.getSpace(space.getInt("x"), space.getInt("y")));
                     board.getPlayer(i).setHeading(Heading.valueOf(playerJson.getString("heading")));
                     board.getPlayer(i).setCheckPoint(playerJson.getInt("checkPoint"));
 

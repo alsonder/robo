@@ -106,7 +106,10 @@ public class PlayerView extends Tab implements ViewObserver {
         updateButton = new Button("Update Board");
         updateButton.setOnAction(e -> {
             String serverJson = ClientController.getBoardJSON();
+
             JsonModifier.getJson(serverJson,board);
+            updateView(board);
+
         });
 
         finishButton = new Button("Finish Programming");
