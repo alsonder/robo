@@ -148,7 +148,13 @@ public class AppController implements Observer {
         listView.getItems().addAll(ClientController.getListOfPlayers(game));
 
         Button joinLobbyButton = new Button("Join Lobby");
-        joinLobbyButton.setOnAction(e -> {clientController.addPlayer(game);});
+        joinLobbyButton.setOnAction(e -> {
+            try {
+                clientController.addPlayer(game);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
 
         Button refreshLobbyButton = new Button("Refresh Lobby");
